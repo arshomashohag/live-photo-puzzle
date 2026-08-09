@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield (existing Phase-0 slice; production build-out ahead)
 - **Start Date**: 2026-08-09T10:21:33Z
-- **Current Stage**: INCEPTION - Requirements Analysis COMPLETE (awaiting approval → User Stories/Workflow Planning)
+- **Current Stage**: INCEPTION - Workflow Planning COMPLETE (awaiting approval → CONSTRUCTION: Functional Design)
 - **Delivery**: One phase at a time (Q4=B); this cycle = Phase 1 (architecture + Room persistence)
 
 ## Workspace State
@@ -38,6 +38,24 @@
 - [x] Workspace Detection
 - [~] Reverse Engineering (SKIPPED — see inventory above)
 - [x] Requirements Analysis
+- [~] User Stories (SKIPPED — user declined; technical phase)
+- [x] Workflow Planning
+- [~] Application Design (SKIP — see execution-plan.md)
+- [~] Units Generation (SKIP — single cohesive unit)
+
+### 🟢 CONSTRUCTION PHASE (Phase 1 cycle)
+- [ ] Functional Design — EXECUTE
+- [ ] NFR Requirements — EXECUTE
+- [ ] NFR Design — EXECUTE
+- [~] Infrastructure Design — SKIP (no cloud)
+- [ ] Code Generation — EXECUTE
+- [ ] Build and Test — EXECUTE
+
+## Execution Plan Summary
+- **Cycle scope**: Phase 1 — Architecture hardening + Room persistence
+- **Stages to Execute**: Functional Design, NFR Requirements, NFR Design, Code Generation, Build and Test
+- **Stages to Skip**: Reverse Engineering, User Stories, Application Design, Units Generation, Infrastructure Design (rationale in execution-plan.md)
+- **Plan doc**: aidlc-docs/inception/plans/execution-plan.md
 - [ ] User Stories
 - [ ] Workflow Planning
 - [ ] Application Design
