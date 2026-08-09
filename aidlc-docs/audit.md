@@ -92,3 +92,21 @@
 **Context**: Functional Design Step 6 complete; presenting completion (Step 7), awaiting approval.
 
 ---
+
+## Functional Design — Approval
+**Timestamp**: 2026-08-09T10:21:33Z
+**AI Prompt**: "Request Changes / Continue to Next Stage → NFR Requirements"
+**User Input**: "approve and continue to NFR requirements"
+**AI Response**: "Functional design approved. Proceeding to NFR Requirements for phase1-persistence."
+**Status**: Approved
+**Context**: Functional Design complete; entering NFR Requirements.
+
+---
+
+## NFR Requirements — Plan & Questions Presented (phase1-persistence)
+**Timestamp**: 2026-08-09T10:21:33Z
+**User Input**: (none yet — awaiting answers)
+**AI Response**: "Created aidlc-docs/construction/plans/phase1-persistence-nfr-requirements-plan.md. Most NFRs/tech-stack fixed by requirements; 3 open questions: (1) Room migration policy during pre-release, (2) autosave write safeguard (plain suspend upsert vs conflated), (3) SECURITY-10 dependency-scan approach (OWASP plugin now vs documented-for-Phase-6). Awaiting answers."
+**Context**: NFR Requirements Steps 2–4. GATE: awaiting answers.
+
+---
