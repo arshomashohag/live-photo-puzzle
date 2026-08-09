@@ -75,9 +75,9 @@ for adaptive layout + accessibility.
 - [x] Wire Home gear → Settings route; add `Routes.SETTINGS`.
 
 ## Step 10: Compose UI + unit tests
-- [x] `test`: ThemeResolver + layoutSpec (from Steps 1,4).
-- [x] `androidTest/.../ThemeUiTest.kt` (optional if device): Home renders in dark;
-  Settings theme toggle switches. (Compile-only where no device.)
+- [x] `test`: ThemeResolver + layoutSpec PBT (ThemeLayoutPropertiesTest — done).
+- [ ] `androidTest/.../ThemeUiTest.kt` — NOT created (was optional/device-only);
+  light/dark render verified manually on device instead. Deferred.
 
 ## Step 11: Docs summary
 - [x] `aidlc-docs/construction/phase3-adaptive-ui/code/implementation-summary.md`.
