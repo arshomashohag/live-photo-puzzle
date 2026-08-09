@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield (existing Phase-0 slice; production build-out ahead)
 - **Start Date**: 2026-08-09T10:21:33Z
-- **Current Stage**: CONSTRUCTION (Phase 3.5 redesign cycle) - NFR Design COMPLETE — awaiting approval → Code Generation
+- **Current Stage**: CONSTRUCTION (Phase 3.5 redesign cycle) - Code Generation Part 1 (Planning)
 - **Phase 3**: COMPLETE (adaptive/dark/a11y)
 - **Phase 2**: COMPLETE (custom photo puzzles; lint clean; 29 tests)
 - **Phase 1**: COMPLETE (architecture + Room persistence; adjacent-swap CR applied)

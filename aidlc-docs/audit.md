@@ -591,3 +591,21 @@
 **Context**: Phase 3.5 NFR Design complete; awaiting approval → Code Generation.
 
 ---
+
+## Phase 3.5 Redesign — NFR Design: Approval
+**Timestamp**: 2026-08-10T00:00:00Z
+**AI Prompt**: "Request Changes / Continue to Next Stage → Code Generation"
+**User Input**: "continue"
+**AI Response**: "Redesign NFR design approved. Infrastructure Design SKIP. Extracting v2 per-screen details from the design HTML, then writing Code Generation Part 1 plan."
+**Status**: Approved
+**Context**: Entering Phase 3.5 Code Generation (Planning).
+
+---
+
+## Phase 3.5 Redesign — Code Generation Part 1: Plan Created
+**Timestamp**: 2026-08-10T00:00:00Z
+**AI Prompt**: "Created phase35-redesign-code-generation-plan.md (10 steps) with exact v2 gradients/shadows/radii extracted from the design HTML. Approach: repoint existing TesseraColors accessor names to v2 roles (minimal churn) + new roles/shapes/elevation; alias BlueprintButton→PillButton where helpful; drawer replaces Settings screen. Request approval before Part 2. Options: Request Changes / Approve & Continue → generate."
+**User Input**: (awaiting)
+**Context**: Code Generation Part 1. GATE: awaiting plan approval.
+
+---

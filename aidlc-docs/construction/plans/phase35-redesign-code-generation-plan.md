@@ -1,0 +1,83 @@
+# Code Generation Plan — Phase 3.5: v2 Redesign
+
+**Unit**: `phase35-redesign`
+**Project type**: Brownfield (modify-in-place; remove v1 cruft).
+**Code location**: `app/src/main/java/com/tessera/puzzle/…`; tests `app/src/test/…`.
+Docs → `aidlc-docs/construction/phase35-redesign/code/`.
+
+## Exact v2 visual reference (from the design)
+- **Gradients**: primary `145deg #FF8A5B→#F2603C`; hero `160deg #FF9E5E→#F2603C→#E0447E`;
+  level teal `150deg #7EE7C4→#17B892`, level gold `150deg #FFC46B→#FF8A2B`,
+  level purple `150deg #B39BFF→#7C5CFF`.
+- **Shadows**: card `0 8px 20px rgba(70,35,20,.08)`; primary glow
+  `0 12px 26px rgba(242,96,60,.40)`; drawer `14px 0 40px rgba(70,35,20,.24)`.
+- **Radii**: pill 999, card 22, cardLarge 28, chip 16.
+- **Nunito** weights 600/700/800/900.
+
+---
+
+## Step 1: Nunito fonts + per-level pure logic + PBT
+- [ ] Add `res/font/nunito_regular|semibold|bold|extrabold|black.ttf`.
+- [ ] `domain/model/LevelPalette.kt` (`LevelAccentKey`, `accentFor`).
+- [ ] `test/.../domain/LevelPalettePropertiesTest.kt` (Kotest: totality + 3 distinct keys).
+
+## Step 2: v2 color scheme + shapes + elevation + type
+- [ ] `ui/theme/Color.kt`: replace scheme values with v2 light+dark; add roles
+  (primaryLight, primaryDeep, teal, pink, purple, gold, surfaceAlt) as scheme
+  fields + accessor props. Keep existing names mapped to v2 (Steel→primary, etc.
+  — or rename usages; simplest: repoint the existing accessor names to v2 roles).
+- [ ] `ui/theme/Shapes.kt` (TesseraShapes: pill/card/cardLarge/chip).
+- [ ] `ui/theme/Elevation.kt` (Modifier.softShadow(...), primaryGlow).
+- [ ] `ui/theme/Type.kt`: Nunito families + scale (display 900, heading 800,
+  cardTitle 800, body 700/600, label 700, mono→Nunito 700).
+
+## Step 3: TesseraTheme + accentColor
+- [ ] `ui/theme/Theme.kt`: v2 light/dark schemes into Material3 + LocalTesseraColors;
+  `@Composable accentColor(key): Color`.
+
+## Step 4: v2 primitives (replace blueprint)
+- [ ] `ui/theme/Primitives.kt`: `PillButton(text,onClick,kind,leadingIcon?)`,
+  `RoundedCard`, `Chip(text,accent)`, `Hero(...)`, `GradientBox` helper. Remove
+  `RegistrationFrame` + corner-mark bits and the old `BlueprintButton`
+  (or alias BlueprintButton→PillButton to minimize call-site churn), `DifficultyMeter`
+  restyled (rounded), `GridPreview` restyled (rounded tiles).
+
+## Step 5: Restyle browse/home screens
+- [ ] `SplashScreen`: rounded gradient icon (bob if motion), Nunito wordmark.
+- [ ] `HomeScreen`: rounded hero header w/ menu (drawer) + create pill; continue
+  card (RoundedCard); difficulty cards use per-level gradient; My-puzzles pill;
+  stats as chips/rounded row.
+- [ ] `DifficultyScreen`, `PuzzleSelectScreen`: RoundedCard grid, per-level accent,
+  Chip labels.
+
+## Step 6: Restyle board/complete/create/library/states
+- [ ] `BoardScreen`(+Pause/Complete): rounded board container, per-level accent
+  ring on selected tile, pill buttons, rounded overlay cards.
+- [ ] create/* (Chooser, Camera controls, Review, PickSize, Generating,
+  Permission): pill buttons, RoundedCards, gradient generating.
+- [ ] `MyPuzzlesScreen`: RoundedCards, pill delete confirm; empty state playful.
+
+## Step 7: Settings drawer (replaces Settings screen)
+- [ ] `ui/screens/SettingsDrawerContent.kt` (theme options as chips/rows,
+  sound/haptics switches, reset-stats).
+- [ ] `TesseraApp.kt`: wrap Home in `ModalNavigationDrawer`; Home menu icon opens
+  it; remove `Routes.SETTINGS` + `SettingsScreen` usage (delete SettingsScreen.kt).
+
+## Step 8: Remove v1 cruft
+- [ ] Delete Barlow `.ttf`; delete unused blueprint primitives; fix refs.
+- [ ] Grep audit: no `barlow`, no `RegistrationFrame` remain.
+
+## Step 9: Tests + build
+- [ ] LevelPalette PBT (Step 1) runs; existing suite unaffected.
+- [ ] `assembleDebug` + `testDebugUnitTest` + `lintDebug`.
+
+## Step 10: Docs summary
+- [ ] `aidlc-docs/construction/phase35-redesign/code/implementation-summary.md`.
+
+## Traceability
+FR35-1 → Steps 2,3 · FR35-2 → Step 7 · FR35-3 → Steps 5,6 · FR35-4 → Steps 1,5,6 ·
+FR35-5 → Steps 4,5 · FR35-6 → Steps 1,2 · FR35-7 → Step 8 · PBT → Step 1.
+
+## Scope / Estimated
+- 10 steps; ~6 files created + ~18 modified + deletions (Barlow, SettingsScreen,
+  blueprint prims). Tests: LevelPalette PBT + existing suite.
