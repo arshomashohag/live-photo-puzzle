@@ -110,3 +110,11 @@
 **Context**: NFR Requirements Steps 2–4. GATE: awaiting answers.
 
 ---
+
+## Functional Design — Revision (autosave frequency changed)
+**Timestamp**: 2026-08-09T10:21:33Z
+**User Input**: "Debounced the In-progress board autosave frequency, use best effort but don't save on every move."
+**AI Response**: "Applied change to approved FD artifact BR-2 (and DF-3, repository comment): autosave is now DEBOUNCED / best-effort (~750 ms inactivity window, coalescing rapid moves) instead of every-move — this corresponds to the original FD Question 1 option C, superseding the earlier Q1=A. Added forced saves on onStop / Pause / before-completion so durability holds at critical moments without a write per tap. Documented the accepted trade-off (a few un-paused moves may be lost on abrupt process kill). NFR plan Q2 (write safeguard) is now RESOLVED by this: debounce lives in the ViewModel; repository saveBoard stays a plain suspend IO upsert. PBT/engine properties unaffected (autosave timing is presentation-layer, not engine)."
+**Context**: NFR Requirements stage — user amended a Functional Design decision; FD artifacts updated in place, no re-approval gate re-triggered by user (change is a refinement they directed).
+
+---
