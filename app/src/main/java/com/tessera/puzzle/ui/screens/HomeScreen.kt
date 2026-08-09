@@ -30,8 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tessera.puzzle.domain.model.Difficulty
+import com.tessera.puzzle.domain.model.LevelPalette
 import com.tessera.puzzle.game.GameViewModel
 import com.tessera.puzzle.presentation.ContinueInfo
+import com.tessera.puzzle.ui.theme.accentColor
 import com.tessera.puzzle.ui.theme.DifficultyMeter
 import com.tessera.puzzle.ui.theme.GridPreview
 import com.tessera.puzzle.ui.theme.RegistrationFrame
@@ -126,11 +128,12 @@ fun HomeScreen(
         Text("CHOOSE A DIFFICULTY", style = TesseraType.label.copy(color = TesseraColors.Faint))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Difficulty.entries.forEach { d ->
+                val accent = accentColor(LevelPalette.accentFor(d))
                 RegistrationFrame(
                     Modifier.weight(1f).heightIn(min = 150.dp).clickable { onPickDifficulty(d) },
                 ) {
                     Column {
-                        GridPreview(d.gridSize, Modifier.fillMaxWidth().height(64.dp))
+                        GridPreview(d.gridSize, Modifier.fillMaxWidth().height(64.dp), accent = accent)
                         Column(
                             Modifier.padding(9.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -140,7 +143,7 @@ fun HomeScreen(
                                 "${d.gridSize} × ${d.gridSize} · ${d.tileCount} tiles",
                                 style = TesseraType.body.copy(color = TesseraColors.Muted),
                             )
-                            DifficultyMeter(d.level)
+                            DifficultyMeter(d.level, accent = accent)
                         }
                     }
                 }
