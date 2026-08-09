@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield (existing Phase-0 slice; production build-out ahead)
 - **Start Date**: 2026-08-09T10:21:33Z
-- **Current Stage**: CONSTRUCTION (Phase 3 cycle) - Functional Design COMPLETE — awaiting approval → NFR Requirements
+- **Current Stage**: CONSTRUCTION (Phase 3 cycle) - NFR Requirements COMPLETE — awaiting approval → NFR Design
 - **Phase 2**: COMPLETE (custom photo puzzles; lint clean; 29 tests)
 - **Phase 1**: COMPLETE (architecture + Room persistence; adjacent-swap CR applied)
 - **Phase 2 plan**: EXECUTE = Functional Design, NFR Requirements, NFR Design, Code Generation, Build and Test; SKIP = User Stories, Application Design, Units Generation, Infrastructure Design (see phase2-custom-puzzles/plans/execution-plan.md)
