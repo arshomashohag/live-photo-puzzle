@@ -3,7 +3,8 @@
 ## Project Information
 - **Project Type**: Brownfield (existing Phase-0 slice; production build-out ahead)
 - **Start Date**: 2026-08-09T10:21:33Z
-- **Current Stage**: CONSTRUCTION - Build and Test COMPLETE (Phase 1 cycle done) — awaiting approval → Operations / next phase (Phase 2)
+- **Current Stage**: INCEPTION (Phase 2 cycle) - Requirements Analysis — questions posed, awaiting answers
+- **Phase 1**: COMPLETE (architecture + Room persistence; adjacent-swap CR applied)
 - **Delivery**: One phase at a time (Q4=B); this cycle = Phase 1 (architecture + Room persistence)
 
 ## Workspace State
