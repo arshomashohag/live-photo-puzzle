@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.exifinterface)
+    implementation(libs.androidx.material3.adaptive)
 
     // Coroutines (explicit, pinned)
     implementation(libs.kotlinx.coroutines.android)

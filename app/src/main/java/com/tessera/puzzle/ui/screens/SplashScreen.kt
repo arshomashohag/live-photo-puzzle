@@ -24,20 +24,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tessera.puzzle.ui.theme.TesseraColors
 import com.tessera.puzzle.ui.theme.TesseraType
+import com.tessera.puzzle.ui.theme.rememberReducedMotion
 import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(onDone: () -> Unit) {
+    val reducedMotion = rememberReducedMotion()
     val visible = remember { mutableStateOf(false) }
     val alpha by animateFloatAsState(
-        targetValue = if (visible.value) 1f else 0f,
-        animationSpec = tween(400),
+        targetValue = if (visible.value || reducedMotion) 1f else 0f,
+        animationSpec = tween(if (reducedMotion) 0 else 400),
         label = "splash",
     )
 
     LaunchedEffect(Unit) {
         visible.value = true
-        delay(750)
+        delay(if (reducedMotion) 300 else 750)
         onDone()
     }
 

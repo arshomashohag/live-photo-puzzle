@@ -70,4 +70,7 @@ interface StatsDao {
 
     @Query("SELECT MIN(bestTimeMillis) FROM best_scores WHERE difficulty = 'EASY'")
     fun observeBestEasyTime(): Flow<Long?>
+
+    @Query("DELETE FROM best_scores")
+    suspend fun deleteAll()
 }

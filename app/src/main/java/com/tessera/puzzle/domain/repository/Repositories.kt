@@ -44,6 +44,7 @@ interface StatsRepository {
 
     suspend fun bestScore(puzzleId: String, difficulty: Difficulty): BestScore?
     fun observeHomeStats(): Flow<HomeStats>
+    suspend fun resetAll()
 }
 
 /**

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -97,9 +98,10 @@ fun BoardScreen(
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(
-            Modifier.fillMaxWidth(),
+            Modifier.fillMaxWidth().widthIn(max = 560.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -121,7 +123,7 @@ fun BoardScreen(
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(difficulty.gridSize),
-            modifier = Modifier.fillMaxWidth().aspectRatio(1f).border(1.dp, TesseraColors.Ink),
+            modifier = Modifier.fillMaxWidth().widthIn(max = 560.dp).aspectRatio(1f).border(1.dp, TesseraColors.Ink),
             userScrollEnabled = false,
         ) {
             val sel = board.selected
@@ -171,7 +173,7 @@ fun BoardScreen(
         BlueprintButton(
             text = "Pause",
             onClick = { paused = true },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().widthIn(max = 560.dp),
             filled = false,
         )
     }

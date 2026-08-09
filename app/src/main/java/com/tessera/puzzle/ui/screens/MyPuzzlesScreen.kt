@@ -36,10 +36,12 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tessera.puzzle.domain.model.layoutSpec
 import com.tessera.puzzle.domain.model.persistence.ImageRef
 import com.tessera.puzzle.domain.model.persistence.PuzzleRecord
 import com.tessera.puzzle.domain.model.persistence.PuzzleSource
 import com.tessera.puzzle.game.GameViewModel
+import com.tessera.puzzle.ui.theme.rememberWindowSize
 import com.tessera.puzzle.ui.theme.RegistrationFrame
 import com.tessera.puzzle.ui.theme.TesseraColors
 import com.tessera.puzzle.ui.theme.TesseraType
@@ -69,7 +71,7 @@ fun MyPuzzlesScreen(
             }
         } else {
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Fixed(layoutSpec(rememberWindowSize()).gridColumns),
                 contentPadding = PaddingValues(18.dp),
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
