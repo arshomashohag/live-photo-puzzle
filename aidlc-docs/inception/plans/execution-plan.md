@@ -148,6 +148,21 @@ flowchart TD
 ### 🟡 OPERATIONS PHASE
 - [ ] Operations — PLACEHOLDER
 
+## Reuse vs. Add (confirmed with user)
+
+**Reused as-is (Kotlin — nothing discarded):**
+- Puzzle engine `model/*` (Difficulty, Puzzle, Scramble, BoardState) + 10 tests —
+  *moved* to `domain/` (package rename, same code).
+- All 6 screens (Splash, Home, Difficulty, PuzzleSelect, Board, Complete) — kept;
+  only Home/Board/Complete adapt to StateFlow reads.
+- Design system: Color, Type, Theme, Primitives, fonts, 9 bundled photos.
+- Data helpers: PuzzleCatalog, ImageSlicer.
+- Build scaffolding: version catalog, wrapper, JDK-21 pin, assembleDebug.
+
+**Added this phase (additive Jetpack libraries per approved spec):**
+- Room (persistence), Hilt (DI), StateFlow (UDF), DataStore (settings),
+  Kotest (property-based testing).
+
 ## Package Change Sequence (Brownfield)
 1. Build config — add Hilt/Room/KSP/DataStore/Kotest to version catalog + app module.
 2. `domain/` — move engine (`model/*`), define repository interfaces + domain models.
