@@ -1,9 +1,117 @@
 package com.tessera.puzzle
 
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.tessera.puzzle.game.GameViewModel
+import com.tessera.puzzle.model.Difficulty
+import com.tessera.puzzle.ui.screens.BoardScreen
+import com.tessera.puzzle.ui.screens.CompleteScreen
+import com.tessera.puzzle.ui.screens.DifficultyScreen
+import com.tessera.puzzle.ui.screens.HomeScreen
+import com.tessera.puzzle.ui.screens.PuzzleSelectScreen
+import com.tessera.puzzle.ui.screens.SplashScreen
+import com.tessera.puzzle.ui.theme.TesseraColors
+import com.tessera.puzzle.ui.theme.TesseraTheme
+
+object Routes {
+    const val SPLASH = "splash"
+    const val HOME = "home"
+    const val DIFFICULTY = "difficulty"
+    const val PUZZLE_SELECT = "puzzleSelect/{difficulty}"
+    const val BOARD = "board/{puzzleId}/{difficulty}"
+    const val COMPLETE = "complete"
+
+    fun puzzleSelect(d: Difficulty) = "puzzleSelect/${d.name}"
+    fun board(puzzleId: String, d: Difficulty) = "board/$puzzleId/${d.name}"
+}
 
 @Composable
 fun TesseraApp() {
-    Text("Tessera")
+    TesseraTheme {
+        Surface(color = TesseraColors.Haze, modifier = Modifier.fillMaxSize()) {
+            val nav = rememberNavController()
+            val game: GameViewModel = viewModel()
+            NavHost(navController = nav, startDestination = Routes.SPLASH) {
+                composable(Routes.SPLASH) {
+                    SplashScreen(onDone = {
+                        nav.navigate(Routes.HOME) {
+                            popUpTo(Routes.SPLASH) { inclusive = true }
+                        }
+                    })
+                }
+                composable(Routes.HOME) {
+                    HomeScreen(
+                        game = game,
+                        onContinue = {
+                            val b = game.board.value ?: return@HomeScreen
+                            nav.navigate(Routes.board(b.puzzle.id, b.difficulty))
+                        },
+                        onPickDifficulty = { d -> nav.navigate(Routes.puzzleSelect(d)) },
+                    )
+                }
+                composable(Routes.DIFFICULTY) {
+                    DifficultyScreen(
+                        onBack = { nav.popBackStack() },
+                        onPick = { d -> nav.navigate(Routes.puzzleSelect(d)) },
+                    )
+                }
+                composable(
+                    Routes.PUZZLE_SELECT,
+                    arguments = listOf(navArgument("difficulty") { type = NavType.StringType }),
+                ) { entry ->
+                    val d = Difficulty.valueOf(entry.arguments!!.getString("difficulty")!!)
+                    PuzzleSelectScreen(
+                        difficulty = d,
+                        onBack = { nav.popBackStack() },
+                        onPick = { p -> nav.navigate(Routes.board(p.id, d)) },
+                    )
+                }
+                composable(
+                    Routes.BOARD,
+                    arguments = listOf(
+                        navArgument("puzzleId") { type = NavType.StringType },
+                        navArgument("difficulty") { type = NavType.StringType },
+                    ),
+                ) { entry ->
+                    val pid = entry.arguments!!.getString("puzzleId")!!
+                    val d = Difficulty.valueOf(entry.arguments!!.getString("difficulty")!!)
+                    BoardScreen(
+                        game = game,
+                        puzzleId = pid,
+                        difficulty = d,
+                        onSolved = {
+                            nav.navigate(Routes.COMPLETE) {
+                                popUpTo(Routes.BOARD) { inclusive = true }
+                            }
+                        },
+                        onExit = { nav.popBackStack() },
+                    )
+                }
+                composable(Routes.COMPLETE) {
+                    CompleteScreen(
+                        game = game,
+                        onNext = {
+                            val run = game.lastCompleted.value
+                            if (run != null) {
+                                nav.navigate(Routes.puzzleSelect(run.difficulty)) {
+                                    popUpTo(Routes.HOME)
+                                }
+                            } else {
+                                nav.popBackStack(Routes.HOME, false)
+                            }
+                        },
+                        onHome = { nav.popBackStack(Routes.HOME, false) },
+                    )
+                }
+            }
+        }
+    }
 }
