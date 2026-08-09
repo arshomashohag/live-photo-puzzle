@@ -58,3 +58,21 @@
 **Context**: Workflow Planning — tech-stack reuse confirmation.
 
 ---
+
+## Workflow Planning — Approval
+**Timestamp**: 2026-08-09T10:21:33Z
+**AI Prompt**: "Request Changes / Add Skipped Stages / Approve & Continue → Functional Design"
+**User Input**: "approve and continue to functional design"
+**AI Response**: "Execution plan approved. Entering CONSTRUCTION phase — Functional Design for Phase 1 (architecture + Room persistence)."
+**Status**: Approved
+**Context**: Workflow Planning complete; proceeding to Functional Design.
+
+---
+
+## Functional Design — Plan & Questions Presented (phase1-persistence)
+**Timestamp**: 2026-08-09T10:21:33Z
+**User Input**: (none yet — awaiting answers)
+**AI Response**: "Created aidlc-docs/construction/plans/phase1-persistence-functional-design-plan.md with a checkbox plan and 6 embedded clarifying questions on functional/schema details: (1) autosave frequency, (2) how many in-progress boards, (3) best-score scope key, (4) Home stats-strip real metrics, (5) corrupt/missing-save resiliency behavior, (6) how bundled puzzles live in the DB. Technical stack already locked in requirements; these are business-logic/schema decisions only. Awaiting answers."
+**Context**: Functional Design Steps 2–4. GATE: awaiting answers before generating design artifacts.
+
+---
