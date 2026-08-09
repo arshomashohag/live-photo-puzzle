@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -23,6 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -48,6 +51,7 @@ fun HomeScreen(
     onPickDifficulty: (Difficulty) -> Unit,
     onCreate: () -> Unit,
     onMyPuzzles: () -> Unit,
+    onSettings: () -> Unit,
 ) {
     val state by game.homeUiState.collectAsStateWithLifecycle()
     val scroll = rememberScrollState()
@@ -60,10 +64,21 @@ fun HomeScreen(
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Box(Modifier.size(32.dp).background(TesseraColors.Steel))
             Spacer(Modifier.width(12.dp))
             Text("TESSERA", style = TesseraType.heading.copy(fontSize = 26.sp, color = TesseraColors.Ink))
+            Spacer(Modifier.weight(1f))
+            Box(
+                Modifier.size(48.dp).clickable { onSettings() }
+                    .semantics { contentDescription = "Settings" },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("⚙", style = TesseraType.heading.copy(color = TesseraColors.Ink))
+            }
         }
 
         if (state.restoreNotice) {
@@ -97,8 +112,9 @@ fun HomeScreen(
 
         Box(
             Modifier
-                .fillMaxWidth().height(60.dp).background(TesseraColors.Steel)
-                .clickable { onCreate() },
+                .fillMaxWidth().heightIn(min = 60.dp).background(TesseraColors.Steel)
+                .clickable { onCreate() }
+                .padding(vertical = 12.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -111,7 +127,7 @@ fun HomeScreen(
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Difficulty.entries.forEach { d ->
                 RegistrationFrame(
-                    Modifier.weight(1f).height(150.dp).clickable { onPickDifficulty(d) },
+                    Modifier.weight(1f).heightIn(min = 150.dp).clickable { onPickDifficulty(d) },
                 ) {
                     Column {
                         GridPreview(d.gridSize, Modifier.fillMaxWidth().height(64.dp))
@@ -132,10 +148,10 @@ fun HomeScreen(
         }
 
         Box(
-            Modifier.fillMaxWidth().height(56.dp)
+            Modifier.fillMaxWidth().heightIn(min = 56.dp)
                 .border(1.dp, TesseraColors.Hairline)
                 .clickable { onMyPuzzles() }
-                .padding(horizontal = 14.dp),
+                .padding(horizontal = 14.dp, vertical = 14.dp),
             contentAlignment = Alignment.CenterStart,
         ) {
             Text(
@@ -144,7 +160,7 @@ fun HomeScreen(
             )
         }
 
-        Row(Modifier.fillMaxWidth().height(64.dp).background(TesseraColors.Paper)) {
+        Row(Modifier.fillMaxWidth().heightIn(min = 64.dp).background(TesseraColors.Paper)) {
             StatCell("SOLVED", state.stats.solvedTotal.toString(), Modifier.weight(1f))
             StatCell("BEST 3×3", fmtTime(state.stats.bestEasyTimeMillis), Modifier.weight(1f))
             StatCell("CREATED", state.stats.createdCount.toString(), Modifier.weight(1f))

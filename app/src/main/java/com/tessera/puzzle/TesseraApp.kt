@@ -1,10 +1,13 @@
 package com.tessera.puzzle
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,7 +22,10 @@ import com.tessera.puzzle.ui.screens.HomeScreen
 import com.tessera.puzzle.ui.screens.MyPuzzlesScreen
 import com.tessera.puzzle.ui.screens.PuzzleSelectScreen
 import com.tessera.puzzle.ui.screens.SplashScreen
+import com.tessera.puzzle.ui.screens.SettingsScreen
 import com.tessera.puzzle.ui.screens.create.CreateFlowHost
+import com.tessera.puzzle.domain.model.ThemeResolver
+import com.tessera.puzzle.presentation.SettingsViewModel
 import com.tessera.puzzle.ui.theme.TesseraColors
 import com.tessera.puzzle.ui.theme.TesseraTheme
 
@@ -32,6 +38,7 @@ object Routes {
     const val COMPLETE = "complete"
     const val CREATE = "create"
     const val MY_PUZZLES = "myPuzzles"
+    const val SETTINGS = "settings"
 
     fun puzzleSelect(d: Difficulty) = "puzzleSelect/${d.name}"
     fun board(puzzleId: String, d: Difficulty) = "board/$puzzleId/${d.name}"
@@ -39,7 +46,10 @@ object Routes {
 
 @Composable
 fun TesseraApp() {
-    TesseraTheme {
+    val settingsVm: SettingsViewModel = hiltViewModel()
+    val settings by settingsVm.settings.collectAsStateWithLifecycle()
+    val darkTheme = ThemeResolver.isDark(settings.theme, isSystemInDarkTheme())
+    TesseraTheme(darkTheme = darkTheme) {
         Surface(color = TesseraColors.Haze, modifier = Modifier.fillMaxSize()) {
             val nav = rememberNavController()
             // One ViewModel shared across destinations (activity-scoped), so the
@@ -62,6 +72,7 @@ fun TesseraApp() {
                         onPickDifficulty = { d -> nav.navigate(Routes.puzzleSelect(d)) },
                         onCreate = { nav.navigate(Routes.CREATE) },
                         onMyPuzzles = { nav.navigate(Routes.MY_PUZZLES) },
+                        onSettings = { nav.navigate(Routes.SETTINGS) },
                     )
                 }
                 composable(Routes.DIFFICULTY) {
@@ -135,6 +146,9 @@ fun TesseraApp() {
                             nav.navigate(Routes.board(puzzleId, Difficulty.MEDIUM))
                         },
                     )
+                }
+                composable(Routes.SETTINGS) {
+                    SettingsScreen(onBack = { nav.popBackStack() })
                 }
             }
         }

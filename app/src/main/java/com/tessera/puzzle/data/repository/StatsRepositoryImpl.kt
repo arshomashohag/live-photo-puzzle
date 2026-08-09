@@ -54,6 +54,10 @@ class StatsRepositoryImpl @Inject constructor(
         statsDao.get(puzzleId, difficulty.name)?.toDomainOrNull()
     }
 
+    override suspend fun resetAll() = withContext(io) {
+        statsDao.deleteAll()
+    }
+
     override fun observeHomeStats(): Flow<HomeStats> = combine(
         statsDao.observeSolvedTotal(),
         statsDao.observeBestEasyTime(),
