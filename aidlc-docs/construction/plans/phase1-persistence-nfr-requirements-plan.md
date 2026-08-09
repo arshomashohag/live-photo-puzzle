@@ -3,15 +3,15 @@
 **Unit**: `phase1-persistence`
 
 ## Plan Checklist
-- [ ] Capture tech-stack decisions (Hilt, Room, KSP, DataStore, Kotest) with versions
-- [ ] Performance NFRs (off-main-thread I/O, autosave write budget, startup)
-- [ ] Security NFRs (applicable SECURITY rules for this unit)
-- [ ] Resiliency NFRs (process-death survival, corrupt-data handling)
-- [ ] Maintainability/Testability NFRs (layering, PBT, coverage targets)
-- [ ] Reliability NFRs (fail-safe error handling, resource cleanup)
-- [ ] Collect answers; resolve ambiguities
-- [ ] Generate nfr-requirements.md + tech-stack-decisions.md
-- [ ] Compliance summary (Security/Resiliency/PBT)
+- [x] Capture tech-stack decisions (Hilt, Room, KSP, DataStore, Kotest) with versions
+- [x] Performance NFRs (off-main-thread I/O, autosave write budget, startup)
+- [x] Security NFRs (applicable SECURITY rules for this unit)
+- [x] Resiliency NFRs (process-death survival, corrupt-data handling)
+- [x] Maintainability/Testability NFRs (layering, PBT, coverage targets)
+- [x] Reliability NFRs (fail-safe error handling, resource cleanup)
+- [x] Collect answers; resolve ambiguities
+- [x] Generate nfr-requirements.md + tech-stack-decisions.md
+- [x] Compliance summary (Security/Resiliency/PBT)
 
 ---
 
@@ -29,7 +29,7 @@ B) Write explicit Room migrations from the very first schema version now — mor
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 2: Autosave write mechanism — RESOLVED (superseded by FD change)
 Functional Design BR-2 now uses **debounced/best-effort** autosave (~750 ms
@@ -51,4 +51,4 @@ B) Document a manual periodic check (e.g. `gradlew dependencies` review + adviso
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: B

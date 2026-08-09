@@ -118,3 +118,11 @@
 **Context**: NFR Requirements stage — user amended a Functional Design decision; FD artifacts updated in place, no re-approval gate re-triggered by user (change is a refinement they directed).
 
 ---
+
+## NFR Requirements — Answers & Artifacts (phase1-persistence)
+**Timestamp**: 2026-08-09T10:21:33Z
+**User Input**: "use your recommendation"
+**AI Response**: "Applied recommended answers: Q1=A (Room destructive migration during dev; explicit migrations authored in Phase 6; schema exported for review), Q2=RESOLVED (debounce in ViewModel, repo save = suspend IO upsert), Q3=B (dependency vuln scan documented in RELEASE_CHECKLIST for Phase 6). Generated tech-stack-decisions.md (Hilt 2.52, Room 2.6.1, KSP, DataStore 1.1.1, StateFlow, Kotest 5.9.1 per PBT-09; explicit pinned coroutines) and nfr-requirements.md (P-1..P-4 performance, S-1..S-6 security with cloud rules N/A, R-1..R-3 resiliency, M-1..M-4 maintainability/PBT, reliability, verification gates). Marked plan complete."
+**Context**: NFR Requirements Steps 5–6 complete; presenting completion, awaiting approval.
+
+---
