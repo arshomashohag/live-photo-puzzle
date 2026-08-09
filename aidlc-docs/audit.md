@@ -76,3 +76,19 @@
 **Context**: Functional Design Steps 2–4. GATE: awaiting answers before generating design artifacts.
 
 ---
+
+## Functional Design — Answers Received (phase1-persistence)
+**Timestamp**: 2026-08-09T10:21:33Z
+**User Input**: "use my recommendation" + answers in plan file: Q1=A (autosave every move), Q2=B (one in-progress board per puzzle+difficulty), Q3=A (best per puzzle+difficulty), Q4=A (SOLVED / BEST 3×3 / CREATED), Q5=B (discard corrupt + friendly notice), Q6=A (seed 9 bundled rows on first launch, non-deletable).
+**AI Response**: "Used the user's explicit answers. No contradictions. Resolved a consistency point from Q2=B: multiple in-progress boards may exist, so Home 'Continue' surfaces the most-recently-played in-progress board, and Puzzle Select shows a resume affordance per puzzle with a saved board. Proceeding to generate business-logic-model.md, business-rules.md, domain-entities.md, and PBT-01 property identification."
+**Context**: Functional Design Step 5 complete; generating artifacts (Step 6).
+
+---
+
+## Functional Design — Artifacts Generated (phase1-persistence)
+**Timestamp**: 2026-08-09T10:21:33Z
+**User Input**: (none — informational)
+**AI Response**: "Generated domain-entities.md (PuzzleRecord, ImageRef, SavedBoard, BestScore, Settings, HomeStats), business-rules.md (BR-1..BR-10), business-logic-model.md (repository interfaces, DF-1..DF-5 data flows, and mandatory PBT-01 testable-properties table for engine + persistence mapping). Marked functional-design plan checkboxes complete. Compliance: PBT-01 satisfied (properties identified incl. explicit 'no PBT' note for glue); SECURITY-03/09/15 and Resiliency reflected in BR-8/BR-9/BR-10."
+**Context**: Functional Design Step 6 complete; presenting completion (Step 7), awaiting approval.
+
+---
