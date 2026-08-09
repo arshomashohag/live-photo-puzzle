@@ -21,7 +21,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.heightIn
 import com.tessera.puzzle.domain.model.Difficulty
+import com.tessera.puzzle.domain.model.LevelPalette
+import com.tessera.puzzle.ui.theme.accentColor
 import com.tessera.puzzle.ui.theme.DifficultyMeter
 import com.tessera.puzzle.ui.theme.GridPreview
 import com.tessera.puzzle.ui.theme.RegistrationFrame
@@ -54,11 +57,12 @@ fun DifficultyScreen(onBack: () -> Unit, onPick: (Difficulty) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Difficulty.entries.forEach { d ->
+                val accent = accentColor(LevelPalette.accentFor(d))
                 RegistrationFrame(
-                    Modifier.fillMaxWidth().height(140.dp).clickable { onPick(d) },
+                    Modifier.fillMaxWidth().heightIn(min = 140.dp).clickable { onPick(d) },
                 ) {
                     Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                        GridPreview(d.gridSize, Modifier.size(112.dp))
+                        GridPreview(d.gridSize, Modifier.size(112.dp), accent = accent)
                         Spacer(Modifier.width(14.dp))
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(verticalAlignment = Alignment.Bottom) {
@@ -73,7 +77,7 @@ fun DifficultyScreen(onBack: () -> Unit, onPick: (Difficulty) -> Unit) {
                                 )
                             }
                             Text("${d.gridSize} × ${d.gridSize} grid · ${d.tileCount} tiles", style = TesseraType.body)
-                            DifficultyMeter(d.level)
+                            DifficultyMeter(d.level, accent = accent)
                         }
                     }
                 }

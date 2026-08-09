@@ -17,62 +17,62 @@ Docs → `aidlc-docs/construction/phase35-redesign/code/`.
 ---
 
 ## Step 1: Nunito fonts + per-level pure logic + PBT
-- [ ] Add `res/font/nunito_regular|semibold|bold|extrabold|black.ttf`.
-- [ ] `domain/model/LevelPalette.kt` (`LevelAccentKey`, `accentFor`).
-- [ ] `test/.../domain/LevelPalettePropertiesTest.kt` (Kotest: totality + 3 distinct keys).
+- [x] Add `res/font/nunito_regular|semibold|bold|extrabold|black.ttf`.
+- [x] `domain/model/LevelPalette.kt` (`LevelAccentKey`, `accentFor`).
+- [x] `test/.../domain/LevelPalettePropertiesTest.kt` (Kotest: totality + 3 distinct keys).
 
 ## Step 2: v2 color scheme + shapes + elevation + type
-- [ ] `ui/theme/Color.kt`: replace scheme values with v2 light+dark; add roles
+- [x] `ui/theme/Color.kt`: replace scheme values with v2 light+dark; add roles
   (primaryLight, primaryDeep, teal, pink, purple, gold, surfaceAlt) as scheme
   fields + accessor props. Keep existing names mapped to v2 (Steel→primary, etc.
   — or rename usages; simplest: repoint the existing accessor names to v2 roles).
-- [ ] `ui/theme/Shapes.kt` (TesseraShapes: pill/card/cardLarge/chip).
-- [ ] `ui/theme/Elevation.kt` (Modifier.softShadow(...), primaryGlow).
-- [ ] `ui/theme/Type.kt`: Nunito families + scale (display 900, heading 800,
+- [x] `ui/theme/Shapes.kt` (TesseraShapes: pill/card/cardLarge/chip).
+- [x] `ui/theme/Elevation.kt` (Modifier.softShadow(...), primaryGlow).
+- [x] `ui/theme/Type.kt`: Nunito families + scale (display 900, heading 800,
   cardTitle 800, body 700/600, label 700, mono→Nunito 700).
 
 ## Step 3: TesseraTheme + accentColor
-- [ ] `ui/theme/Theme.kt`: v2 light/dark schemes into Material3 + LocalTesseraColors;
+- [x] `ui/theme/Theme.kt`: v2 light/dark schemes into Material3 + LocalTesseraColors;
   `@Composable accentColor(key): Color`.
 
 ## Step 4: v2 primitives (replace blueprint)
-- [ ] `ui/theme/Primitives.kt`: `PillButton(text,onClick,kind,leadingIcon?)`,
+- [x] `ui/theme/Primitives.kt`: `PillButton(text,onClick,kind,leadingIcon?)`,
   `RoundedCard`, `Chip(text,accent)`, `Hero(...)`, `GradientBox` helper. Remove
   `RegistrationFrame` + corner-mark bits and the old `BlueprintButton`
   (or alias BlueprintButton→PillButton to minimize call-site churn), `DifficultyMeter`
   restyled (rounded), `GridPreview` restyled (rounded tiles).
 
 ## Step 5: Restyle browse/home screens
-- [ ] `SplashScreen`: rounded gradient icon (bob if motion), Nunito wordmark.
-- [ ] `HomeScreen`: rounded hero header w/ menu (drawer) + create pill; continue
+- [x] `SplashScreen`: rounded gradient icon (bob if motion), Nunito wordmark.
+- [x] `HomeScreen`: rounded hero header w/ menu (drawer) + create pill; continue
   card (RoundedCard); difficulty cards use per-level gradient; My-puzzles pill;
   stats as chips/rounded row.
-- [ ] `DifficultyScreen`, `PuzzleSelectScreen`: RoundedCard grid, per-level accent,
+- [x] `DifficultyScreen`, `PuzzleSelectScreen`: RoundedCard grid, per-level accent,
   Chip labels.
 
 ## Step 6: Restyle board/complete/create/library/states
-- [ ] `BoardScreen`(+Pause/Complete): rounded board container, per-level accent
+- [x] `BoardScreen`(+Pause/Complete): rounded board container, per-level accent
   ring on selected tile, pill buttons, rounded overlay cards.
-- [ ] create/* (Chooser, Camera controls, Review, PickSize, Generating,
+- [x] create/* (Chooser, Camera controls, Review, PickSize, Generating,
   Permission): pill buttons, RoundedCards, gradient generating.
-- [ ] `MyPuzzlesScreen`: RoundedCards, pill delete confirm; empty state playful.
+- [x] `MyPuzzlesScreen`: RoundedCards, pill delete confirm; empty state playful.
 
 ## Step 7: Settings drawer (replaces Settings screen)
-- [ ] `ui/screens/SettingsDrawerContent.kt` (theme options as chips/rows,
+- [x] `ui/screens/SettingsDrawerContent.kt` (theme options as chips/rows,
   sound/haptics switches, reset-stats).
-- [ ] `TesseraApp.kt`: wrap Home in `ModalNavigationDrawer`; Home menu icon opens
+- [x] `TesseraApp.kt`: wrap Home in `ModalNavigationDrawer`; Home menu icon opens
   it; remove `Routes.SETTINGS` + `SettingsScreen` usage (delete SettingsScreen.kt).
 
 ## Step 8: Remove v1 cruft
-- [ ] Delete Barlow `.ttf`; delete unused blueprint primitives; fix refs.
-- [ ] Grep audit: no `barlow`, no `RegistrationFrame` remain.
+- [x] Delete Barlow `.ttf`; delete unused blueprint primitives; fix refs.
+- [x] Grep audit: no `barlow`, no `RegistrationFrame` remain.
 
 ## Step 9: Tests + build
-- [ ] LevelPalette PBT (Step 1) runs; existing suite unaffected.
-- [ ] `assembleDebug` + `testDebugUnitTest` + `lintDebug`.
+- [x] LevelPalette PBT (Step 1) runs; existing suite unaffected.
+- [x] `assembleDebug` + `testDebugUnitTest` + `lintDebug`.
 
 ## Step 10: Docs summary
-- [ ] `aidlc-docs/construction/phase35-redesign/code/implementation-summary.md`.
+- [x] `aidlc-docs/construction/phase35-redesign/code/implementation-summary.md`.
 
 ## Traceability
 FR35-1 → Steps 2,3 · FR35-2 → Step 7 · FR35-3 → Steps 5,6 · FR35-4 → Steps 1,5,6 ·
