@@ -23,7 +23,7 @@ B) No — skip all SECURITY rules (suitable for PoCs, prototypes, and experiment
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 2: Resiliency Extensions
 Should the resiliency baseline be applied to this project? (It is a set of
@@ -36,7 +36,7 @@ B) No — skip the resiliency baseline (this is an offline, on-device Android ap
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 3: Property-Based Testing Extension
 Should property-based testing (PBT) rules be enforced for this project? (The
@@ -51,7 +51,7 @@ C) No — skip all PBT rules
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 4: Delivery scope of this planning cycle
 The production spec is large (7 phases). How should AI-DLC plan/build it?
@@ -62,7 +62,7 @@ B) Plan + build **one phase at a time** — do full requirements→design→code
 
 C) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: B
 
 ## Question 5: Bundled-puzzle photos for a production release
 The 9 bundled photos are currently fetched at build time from picsum.photos
@@ -77,7 +77,7 @@ C) You will provide your own licensed photos before release; keep current ones a
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 6: Minimum Android version (minSdk)
 Currently minSdk = 26 (Android 8.0). The modern photo picker
@@ -92,7 +92,7 @@ C) Raise to minSdk 29 or higher (Android 10+) — fewer legacy edge cases, small
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: C
 
 ## Question 7: App identity for release (applicationId & app name)
 Release builds need a stable application id. Current is
@@ -104,7 +104,7 @@ B) Change the applicationId and/or display name (describe in Other)
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 8: "Best score" definition
 For each puzzle+difficulty, best score is tracked. Rank primarily by:
@@ -117,4 +117,4 @@ C) Track and display both independently (best time AND best moves), no single ra
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A

@@ -3,7 +3,8 @@
 ## Project Information
 - **Project Type**: Brownfield (existing Phase-0 slice; production build-out ahead)
 - **Start Date**: 2026-08-09T10:21:33Z
-- **Current Stage**: INCEPTION - Requirements Analysis
+- **Current Stage**: INCEPTION - Requirements Analysis COMPLETE (awaiting approval → User Stories/Workflow Planning)
+- **Delivery**: One phase at a time (Q4=B); this cycle = Phase 1 (architecture + Room persistence)
 
 ## Workspace State
 - **Existing Code**: Yes
@@ -35,8 +36,8 @@
 ## Stage Progress
 ### 🔵 INCEPTION PHASE
 - [x] Workspace Detection
-- [ ] Reverse Engineering (SKIPPED — see inventory above)
-- [ ] Requirements Analysis (IN PROGRESS)
+- [~] Reverse Engineering (SKIPPED — see inventory above)
+- [x] Requirements Analysis
 - [ ] User Stories
 - [ ] Workflow Planning
 - [ ] Application Design
@@ -45,4 +46,25 @@
 ## Extension Configuration
 | Extension | Enabled | Decided At |
 |---|---|---|
-| (pending Requirements Analysis opt-in answers) | — | — |
+| Security Baseline | Yes | Requirements Analysis |
+| Resiliency Baseline | Yes | Requirements Analysis |
+| Property-Based Testing | Yes (Full) | Requirements Analysis |
+
+**Applicability notes (offline on-device Android app):**
+- **Security**: Many rules are cloud/web-oriented and will be marked N/A per
+  stage (SECURITY-01 encryption-at-rest/TLS, -02 network intermediaries, -04
+  HTTP headers, -06 IAM, -07 network config, -08 endpoint authz, -12
+  user-auth, -13 CDN/SRI, -14 alerting). **Actively enforced** (relevant):
+  SECURITY-03 (no PII/photo logging), SECURITY-05 (input validation on
+  images/DB inputs), SECURITY-09 (no stack traces to users; current supported
+  SDK/deps), SECURITY-10 (dependency pinning via version catalog + lockfile,
+  vuln scan, no unused deps), SECURITY-11 (isolate security-relevant logic),
+  SECURITY-15 (fail-safe exception handling, resource cleanup for bitmaps/DB/IO).
+- **Resiliency**: AWS Reliability-Pillar practice areas that assume cloud/DR/HA
+  are N/A. Applied on-device: graceful degradation (corrupt image / missing
+  file / DB failure), recoverability (survive process death, corrupt-save
+  handling), observability (crash-safety without PII logging).
+- **PBT**: Full enforcement. Framework = **Kotest Property Testing** (Kotlin).
+  Applies to the pure puzzle engine (scramble validity/solvability invariants,
+  swap round-trip/commutativity, completion oracle) and to persistence
+  serialization round-trips (entity ↔ domain mapping).
