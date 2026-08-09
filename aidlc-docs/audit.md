@@ -293,3 +293,11 @@
 **Context**: Entering Phase 2 NFR Requirements.
 
 ---
+
+## Phase 2 Cycle — NFR Requirements: Answers & Artifacts
+**Timestamp**: 2026-08-09T10:21:33Z
+**User Input**: "use your recommendations"
+**AI Response**: "Recorded NFR answers (A×4): CameraX ImageCapture-only, read EXIF and rotate upright before slice, delete temp capture file after import/cancel, instrumented tests cover picker→save→library→delete + permission UI (live camera manual). Generated tech-stack-decisions.md (CameraX 1.3.4 modules, exifinterface 1.3.7, PickVisualMedia, no extra image lib; manifest CAMERA + optional camera feature; no INTERNET) and nfr-requirements.md (PM-1..PM-5 memory/perf, S-03/05/09/10/11/15 security, privacy, R-1..R-3 resiliency, accessibility, T-1..T-3 testing, verification gates). Marked plan complete."
+**Context**: Phase 2 NFR Requirements complete; awaiting approval → NFR Design.
+
+---
