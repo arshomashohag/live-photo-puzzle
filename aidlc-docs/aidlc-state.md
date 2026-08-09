@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield (existing Phase-0 slice; production build-out ahead)
 - **Start Date**: 2026-08-09T10:21:33Z
-- **Current Stage**: CONSTRUCTION - Functional Design (phase1-persistence) COMPLETE — awaiting approval → NFR Requirements
+- **Current Stage**: CONSTRUCTION - NFR Requirements (phase1-persistence) — questions posed, awaiting answers
 - **Delivery**: One phase at a time (Q4=B); this cycle = Phase 1 (architecture + Room persistence)
 
 ## Workspace State
