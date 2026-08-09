@@ -13,7 +13,7 @@ interface PuzzleRepository {
 
 interface BoardRepository {
     suspend fun loadBoard(puzzleId: String, difficulty: Difficulty): SavedBoard?
-    suspend fun saveBoard(board: SavedBoard)          // BR-2 (every move)
+    suspend fun saveBoard(board: SavedBoard)          // BR-2 (debounced/forced by caller)
     suspend fun clearBoard(puzzleId: String, difficulty: Difficulty)
     fun observeMostRecent(): Flow<SavedBoard?>        // BR-3 (Continue)
     suspend fun boardsForPuzzle(puzzleId: String): List<SavedBoard>
@@ -47,9 +47,10 @@ BR-8 (discard + notice).
 Open (puzzleId, difficulty) → `loadBoard`. If present and valid → resume; else
 create fresh scramble (existing engine) → `saveBoard`. Validation per BR-8.
 
-### DF-3 Play (every move)
-`tap(pos)` → engine `BoardState.tapTile` (unchanged) → new state →
-`saveBoard` (BR-2). Off main thread (BR-9).
+### DF-3 Play (debounced autosave)
+`tap(pos)` → engine `BoardState.tapTile` (unchanged) → new state → **schedule a
+debounced save** (~750 ms; rapid taps coalesce, BR-2). Forced immediate save on
+onStop / Pause / before completion. Off main thread (BR-9).
 
 ### DF-4 Completion
 Engine reports `isSolved` → `recordCompletion` (BR-4) → `clearBoard` (DF-2 row

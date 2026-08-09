@@ -8,11 +8,23 @@
   re-running must not duplicate rows (keyed by stable id).
 - Bundled rows are **never deletable** (BR-7 rejects deletion).
 
-## BR-2 In-progress autosave (Q1=A, Q2=B)
-- The active board is persisted as a SavedBoard **on every move** (each swap),
-  keyed by (puzzleId, difficulty).
+## BR-2 In-progress autosave (Q1=C debounced/best-effort, Q2=B)
+- The active board is persisted as a SavedBoard **best-effort, debounced** —
+  **not** on every move. Concretely:
+  - After a move, a save is scheduled with a short debounce window
+    (~750 ms of inactivity); rapid consecutive moves collapse into a single
+    write once the player pauses.
+  - A save is **also forced immediately** on lifecycle events where progress
+    must not be lost: app background/stop (`onStop`), opening Pause, and on
+    completion-handling (before clearing). This guarantees durability at the
+    moments that matter without a write per tap.
+  - Keyed by (puzzleId, difficulty).
+- Because saves are debounced, at most the last few *un-paused* moves could be
+  lost if the process is killed mid-burst without an `onStop` — an accepted
+  trade per the user's "best effort, don't save on every move" directive.
 - Starting/opening a puzzle+difficulty with an existing SavedBoard **resumes**
-  from it; without one, a fresh scrambled board is created and immediately saved.
+  from it; without one, a fresh scrambled board is created and saved (debounced;
+  forced once at creation so a brand-new board is immediately recoverable).
 - `updatedAt` is set on each save.
 - Multiple SavedBoards may coexist (one per puzzle+difficulty).
 

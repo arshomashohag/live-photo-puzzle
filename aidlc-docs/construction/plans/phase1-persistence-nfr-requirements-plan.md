@@ -31,17 +31,15 @@ X) Other (please describe after [Answer]: tag below)
 
 [Answer]:
 
-## Question 2: Autosave-on-every-move performance safeguard
-Q1 of functional design chose autosave on every move. To keep writes cheap and
-off the UI thread, which safeguard?
+## Question 2: Autosave write mechanism — RESOLVED (superseded by FD change)
+Functional Design BR-2 now uses **debounced/best-effort** autosave (~750 ms
+inactivity window, coalescing rapid moves), plus forced saves on
+onStop/Pause/before-completion — per the user's "best effort, don't save on
+every move" directive. The debounce (owned by the ViewModel) is itself the
+coalescing mechanism, so the repository `saveBoard` is a plain suspend upsert on
+the IO dispatcher. No separate answer needed.
 
-A) Each save is a suspend upsert on the IO dispatcher (Room handles it); trust Room's speed for a single-row write — simplest, adequate for one small row per move
-
-B) In addition, coalesce rapid consecutive moves so at most one write is in flight at a time (conflate) — extra safety against fast tapping
-
-X) Other (please describe after [Answer]: tag below)
-
-[Answer]:
+[Answer]: RESOLVED — debounced in ViewModel; repo save = suspend upsert on IO
 
 ## Question 3: Dependency vulnerability scanning (SECURITY-10)
 SECURITY-10 requires a dependency vulnerability scan be configured or
