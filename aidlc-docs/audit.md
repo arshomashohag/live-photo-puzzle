@@ -557,3 +557,20 @@
 **Context**: Phase 3.5 Functional Design complete; awaiting approval → NFR Requirements.
 
 ---
+
+## Phase 3.5 Redesign — Functional Design: Approval
+**Timestamp**: 2026-08-10T00:00:00Z
+**AI Prompt**: "Request Changes / Continue to Next Stage → NFR Requirements"
+**User Input**: "approve and continue to NFR requirements"
+**AI Response**: "Redesign FD approved. NFRs light (accessibility/contrast settled; tech = Nunito fonts). No open questions — evaluating categories and generating artifacts directly."
+**Status**: Approved
+**Context**: Entering Phase 3.5 NFR Requirements.
+
+---
+
+## Phase 3.5 Redesign — NFR Requirements: Artifacts
+**Timestamp**: 2026-08-10T00:00:00Z
+**AI Response**: "Category eval: Accessibility + Performance (light) applicable; Security minimal (S-09); Resiliency/Scalability N/A. Generated tech-stack-decisions.md (Nunito fonts bundled; no new libs; ModalNavigationDrawer/adaptive reused) and nfr-requirements.md (A-1..A-4 accessibility incl. AA contrast on both v2 palettes, P-1..P-3 performance for shadows/motion, consistency/no-regression, T-1..T-3 testing, gates). No open questions. Marked plan complete."
+**Context**: Phase 3.5 NFR Requirements complete; awaiting approval → NFR Design.
+
+---
