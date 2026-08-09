@@ -506,3 +506,12 @@
 **Context**: Phase 3 Build and Test complete; Phase 3 cycle finished. Next: Phase 4 (sliding-swap animation, audio, haptics, wired Settings)."
 
 ---
+
+## Phase 3 Build&Test Approval + Phase 3.5 (Redesign) Start
+**Timestamp**: 2026-08-10T00:00:00Z
+**User Input**: "redesign the app - Use the claude_design MCP ... Implement: Tessera Photo Puzzle v2.dc.html"
+**AI Response**: "Imported v2 design via design MCP. v2 is a full visual redesign: Nunito font (replaces Barlow), warm cream/peach canvas (#FFE9DA/#FFF6EF) + coral-orange primary (#F2603C/#FF9E5E) + colorful accents (pink/teal/purple/gold), heavily rounded shapes (99px pills, 20-24px cards), soft colored shadows, bob/pulse/rise animations, a LEFT settings DRAWER, and a v2 dark theme (#2A1210/#2A1F24 plum, #FFF1E6 cream, #4FDDB6 teal). Difficulties stay Easy/Medium/Hard with a colorful per-level palette. Implicitly treats Phase 3 Build&Test as approved (user moved on to a new request). User chose: NEW AI-DLC cycle 'phase3.5-redesign', FULL reskin of all screens. Keeps architecture/gameplay/persistence. Starting Requirements Analysis."
+**Status**: Phase 3 approved (implicit); Phase 3.5 redesign cycle started.
+**Context**: Phase 3.5 Requirements Analysis begins.
+
+---
