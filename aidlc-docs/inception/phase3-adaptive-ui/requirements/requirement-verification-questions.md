@@ -16,7 +16,7 @@ B) Follow system only (no in-app override this phase)
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 2: Dynamic color (Material You)
 Android 12+ can theme from the user's wallpaper.
@@ -27,7 +27,7 @@ B) Offer dynamic color as an option on Android 12+ (wallpaper-based accents)
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 3: Tablet / large-screen layout
 On tablets and large screens, the phone layout looks sparse.
@@ -38,7 +38,7 @@ B) Just center the phone layout with max-width on large screens (simpler, less t
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 4: Board sizing on large screens
 The puzzle board is currently full-width square.
@@ -49,7 +49,7 @@ B) Keep the board full available width on all screens
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 5: Reduced-motion / animations
 Some users enable "remove animations" in accessibility settings.
@@ -60,7 +60,7 @@ B) Keep animations regardless
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 6: Accessibility scope this phase
 Which accessibility work is in scope now?
@@ -71,7 +71,7 @@ B) Content descriptions + font-scaling only; defer focus order / contrast audit
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 7: Settings screen
 A Settings screen is referenced by the design (theme, and later sound/haptics).
@@ -83,4 +83,4 @@ B) Defer the whole Settings screen to Phase 4 (audio/haptics phase); Phase 3 doe
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
