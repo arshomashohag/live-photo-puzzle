@@ -222,3 +222,12 @@
 **Context**: Gameplay rule change applied outside a full stage loop (small, user-directed); documented here + in engine/tests. Phase 2 AI-DLC cycle to follow."
 
 ---
+
+## Change Request — Implementation Complete + correction
+**Timestamp**: 2026-08-09T10:21:33Z
+**User Input**: (none — informational)
+**AI Response**: "Implemented adjacent-only swaps: added Grid adjacency helper (orthogonal, no wrap); tapTile now swaps only edge-sharing neighbors and re-selects on a non-adjacent tap; scramble rewritten to generate via random adjacent swaps (perfect-square guard). Board UI highlights swappable neighbors (sky border) + semantics 'swappable'. CORRECTION to my earlier claim: adjacent-only does NOT create an unsolvable-parity problem for a SWAP puzzle — adjacent transpositions generate the full symmetric group (bubble sort), so every board is solvable; the parity constraint only applies to blank-SLIDE (15-puzzle) mechanics. Generating via adjacent swaps is kept as a difficulty-control nicety, not a correctness requirement. Updated EnginePropertiesTest (removed invalid commutativity/free-swap-oracle; added adjacency involutive, non-adjacent-reselect, and a rigorous snake-path bubble-sort solvability proof verified empirically over 600 cases before porting) and BoardStateTest (adjacency + non-adjacent reselect). Updated functional-design PBT table. Verified: assembleDebug SUCCESSFUL; 22 unit/PBT tests pass (BoardState 8, Scramble 4, EngineProperties 7, Mapper 3). Committed 9a5f38a."
+**Status**: CR complete and verified.
+**Context**: Proceeding to Phase 2 AI-DLC cycle next."
+
+---
