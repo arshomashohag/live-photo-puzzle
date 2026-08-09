@@ -3,15 +3,15 @@
 **Unit**: `phase2-custom-puzzles`
 
 ## Plan Checklist
-- [ ] Capture tech-stack decisions (CameraX modules + versions)
-- [ ] Performance/memory NFRs (OOM safety, off-main-thread, bitmap release)
-- [ ] Security NFRs (image input validation, no PII/EXIF logging, permission)
-- [ ] Resiliency NFRs (capture/decode failure, missing file)
-- [ ] Accessibility NFRs (camera/review/library controls)
-- [ ] Testability NFRs (image-math PBT, instrumented create/delete)
-- [ ] Collect answers; resolve ambiguities
-- [ ] Generate nfr-requirements.md + tech-stack-decisions.md
-- [ ] Compliance summary
+- [x] Capture tech-stack decisions (CameraX modules + versions)
+- [x] Performance/memory NFRs (OOM safety, off-main-thread, bitmap release)
+- [x] Security NFRs (image input validation, no PII/EXIF logging, permission)
+- [x] Resiliency NFRs (capture/decode failure, missing file)
+- [x] Accessibility NFRs (camera/review/library controls)
+- [x] Testability NFRs (image-math PBT, instrumented create/delete)
+- [x] Collect answers; resolve ambiguities
+- [x] Generate nfr-requirements.md + tech-stack-decisions.md
+- [x] Compliance summary
 
 ---
 
@@ -29,7 +29,7 @@ B) ImageCapture + a live Preview with a capture button (standard camera UI) — 
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 2: EXIF orientation handling
 Phone photos carry EXIF rotation. How to handle it during import?
@@ -40,7 +40,7 @@ B) Ignore EXIF (may produce rotated puzzles on some devices)
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 3: Temporary capture file cleanup
 Camera capture writes a temp file before import. After import (or cancel):
@@ -51,7 +51,7 @@ B) Leave temp files in cache (Android clears cache eventually)
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 4: Instrumented test depth for camera
 Camera hardware is hard to test in CI. What instrumented coverage?
@@ -62,4 +62,4 @@ B) Attempt full camera automation (fragile, needs a camera-equipped emulator/dev
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
