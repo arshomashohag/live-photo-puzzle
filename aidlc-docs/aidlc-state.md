@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield (existing Phase-0 slice; production build-out ahead)
 - **Start Date**: 2026-08-09T10:21:33Z
-- **Current Stage**: CONSTRUCTION - Code Generation COMPLETE — awaiting approval → Build and Test
+- **Current Stage**: CONSTRUCTION - Build and Test COMPLETE (Phase 1 cycle done) — awaiting approval → Operations / next phase (Phase 2)
 - **Delivery**: One phase at a time (Q4=B); this cycle = Phase 1 (architecture + Room persistence)
 
 ## Workspace State
@@ -49,7 +49,7 @@
 - [x] NFR Design — COMPLETE
 - [~] Infrastructure Design — SKIP (no cloud)
 - [x] Code Generation — COMPLETE (build + 19 unit/PBT tests green)
-- [ ] Build and Test — EXECUTE
+- [x] Build and Test — COMPLETE (assembleDebug ✅, 19/19 unit+PBT ✅, lint 0 errors ✅; instrumented pending device)
 
 ## Execution Plan Summary
 - **Cycle scope**: Phase 1 — Architecture hardening + Room persistence
