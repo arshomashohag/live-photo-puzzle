@@ -152,3 +152,21 @@
 **Context**: NFR Design Step 6 complete; presenting completion, awaiting approval."
 
 ---
+
+## NFR Design — Approval
+**Timestamp**: 2026-08-09T10:21:33Z
+**AI Prompt**: "Request Changes / Continue to Next Stage → Code Generation"
+**User Input**: "approve and continue to code generation"
+**AI Response**: "NFR design approved. Infrastructure Design is SKIP (offline app). Proceeding to Code Generation Part 1 (Planning) for phase1-persistence."
+**Status**: Approved
+**Context**: NFR Design complete; entering Code Generation (Planning).
+
+---
+
+## Code Generation Part 1 — Plan Created & Approval Requested (phase1-persistence)
+**Timestamp**: 2026-08-09T10:21:33Z
+**AI Prompt**: "Created phase1-persistence-code-generation-plan.md (13 numbered steps, brownfield modify-in-place, ~30 create + ~8 modify, PBT + Room tests). Request approval of the full plan before Part 2 generation. Options: Request Changes / Approve & Continue → generate code."
+**User Input**: (awaiting)
+**Context**: Code Generation Part 1 Steps 4–7. GATE: awaiting plan approval before generation.
+
+---
