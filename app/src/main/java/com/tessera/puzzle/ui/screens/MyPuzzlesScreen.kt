@@ -22,9 +22,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -102,8 +102,9 @@ fun MyPuzzlesScreen(
 @Composable
 private fun CustomCard(p: PuzzleRecord, onPlay: () -> Unit, onDelete: () -> Unit) {
     val thumbPath = (p.imageRef as? ImageRef.FileRef)?.thumbPath
-    val thumb by produceState<ImageBitmap?>(initialValue = null, thumbPath) {
-        value = withContext(Dispatchers.IO) {
+    var thumb by remember(thumbPath) { mutableStateOf<ImageBitmap?>(null) }
+    LaunchedEffect(thumbPath) {
+        thumb = withContext(Dispatchers.IO) {
             thumbPath?.let { path ->
                 runCatching { BitmapFactory.decodeFile(path)?.asImageBitmap() }.getOrNull()
             }
