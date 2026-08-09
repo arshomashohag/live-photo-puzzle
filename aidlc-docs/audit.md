@@ -574,3 +574,20 @@
 **Context**: Phase 3.5 NFR Requirements complete; awaiting approval → NFR Design.
 
 ---
+
+## Phase 3.5 Redesign — NFR Requirements: Approval
+**Timestamp**: 2026-08-10T00:00:00Z
+**AI Prompt**: "Request Changes / Continue to Next Stage → NFR Design"
+**User Input**: "approve and continue to NFR design"
+**AI Response**: "Redesign NFR requirements approved. Generating NFR design patterns (theming single-source, primitive/drawer/contrast/motion) directly; no open questions."
+**Status**: Approved
+**Context**: Entering Phase 3.5 NFR Design.
+
+---
+
+## Phase 3.5 Redesign — NFR Design: Artifacts
+**Timestamp**: 2026-08-10T00:00:00Z
+**AI Response**: "Generated nfr-design-patterns.md (TP-1 single-source v2 tokens + Shapes/Elevation; TP-2 per-level accent indirection; PP-1 rounded/shadow primitives; DP-1 ModalNavigationDrawer + shared VM; XP-1..3 contrast-verified pairings/semantics/non-color; MP-1 reduced-motion gate; PF-1 scoped recomposition + bounded shadows) and logical-components.md (LevelPalette pure; Color/Type/Shapes/Elevation/Theme/Primitives; SettingsDrawerContent; restyled screens; Nunito fonts; Barlow removed). No open questions."
+**Context**: Phase 3.5 NFR Design complete; awaiting approval → Code Generation.
+
+---
