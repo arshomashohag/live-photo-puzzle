@@ -21,7 +21,7 @@ C) Photo picker only (camera deferred)
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 2: Crop / framing before generating
 Puzzles are square. How should the user's photo become square?
@@ -32,7 +32,7 @@ B) Provide a manual crop/reposition step (pinch-zoom + pan to choose the square 
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 3: Difficulty choice for a custom puzzle
 After accepting the photo, how is difficulty chosen?
@@ -43,7 +43,7 @@ B) Don't pick at creation — just save the photo; always choose difficulty late
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 4: Where saved custom puzzles appear
 Custom puzzles are saved to the library ("My puzzles"). How do they surface for play?
@@ -54,7 +54,7 @@ B) Only in the "My puzzles" library screen (kept separate from the bundled Puzzl
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 5: Naming a custom puzzle
 Saved puzzles need a name (for the library + Continue card).
@@ -65,7 +65,7 @@ B) Prompt the user to type a name at save time (with an auto default they can ke
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 6: Image processing target resolution
 To avoid OOM and keep tiles crisp, the accepted photo is downsampled before
@@ -79,7 +79,7 @@ C) Match device screen resolution dynamically
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 7: Delete behavior
 Deleting a custom puzzle (already designed in Phase 1: removes Room row + image
@@ -91,7 +91,7 @@ B) Immediate delete with an Undo snackbar
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 8: Camera permission denial handling
 If the user denies the camera permission, what should happen?
@@ -102,4 +102,4 @@ B) Just fall back silently to the photo picker (if enabled), no explanation scre
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
