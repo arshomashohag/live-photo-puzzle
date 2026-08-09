@@ -1,6 +1,7 @@
 package com.tessera.puzzle.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,9 +21,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -48,9 +46,10 @@ fun HomeScreen(
     game: GameViewModel,
     onContinue: (ContinueInfo) -> Unit,
     onPickDifficulty: (Difficulty) -> Unit,
+    onCreate: () -> Unit,
+    onMyPuzzles: () -> Unit,
 ) {
     val state by game.homeUiState.collectAsStateWithLifecycle()
-    var coming by remember { mutableStateOf(false) }
     val scroll = rememberScrollState()
 
     Column(
@@ -99,11 +98,11 @@ fun HomeScreen(
         Box(
             Modifier
                 .fillMaxWidth().height(60.dp).background(TesseraColors.Steel)
-                .clickable { coming = true },
+                .clickable { onCreate() },
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                if (coming) "COMING SOON" else "CREATE FROM CAMERA",
+                "CREATE FROM CAMERA",
                 style = TesseraType.heading.copy(color = TesseraColors.Paper),
             )
         }
@@ -130,6 +129,19 @@ fun HomeScreen(
                     }
                 }
             }
+        }
+
+        Box(
+            Modifier.fillMaxWidth().height(56.dp)
+                .border(1.dp, TesseraColors.Hairline)
+                .clickable { onMyPuzzles() }
+                .padding(horizontal = 14.dp),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            Text(
+                "MY PUZZLES · ${state.stats.createdCount} SAVED",
+                style = TesseraType.cardTitle,
+            )
         }
 
         Row(Modifier.fillMaxWidth().height(64.dp).background(TesseraColors.Paper)) {

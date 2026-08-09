@@ -16,8 +16,10 @@ import com.tessera.puzzle.ui.screens.BoardScreen
 import com.tessera.puzzle.ui.screens.CompleteScreen
 import com.tessera.puzzle.ui.screens.DifficultyScreen
 import com.tessera.puzzle.ui.screens.HomeScreen
+import com.tessera.puzzle.ui.screens.MyPuzzlesScreen
 import com.tessera.puzzle.ui.screens.PuzzleSelectScreen
 import com.tessera.puzzle.ui.screens.SplashScreen
+import com.tessera.puzzle.ui.screens.create.CreateFlowHost
 import com.tessera.puzzle.ui.theme.TesseraColors
 import com.tessera.puzzle.ui.theme.TesseraTheme
 
@@ -28,6 +30,8 @@ object Routes {
     const val PUZZLE_SELECT = "puzzleSelect/{difficulty}"
     const val BOARD = "board/{puzzleId}/{difficulty}"
     const val COMPLETE = "complete"
+    const val CREATE = "create"
+    const val MY_PUZZLES = "myPuzzles"
 
     fun puzzleSelect(d: Difficulty) = "puzzleSelect/${d.name}"
     fun board(puzzleId: String, d: Difficulty) = "board/$puzzleId/${d.name}"
@@ -56,6 +60,8 @@ fun TesseraApp() {
                             nav.navigate(Routes.board(info.puzzleId, info.difficulty))
                         },
                         onPickDifficulty = { d -> nav.navigate(Routes.puzzleSelect(d)) },
+                        onCreate = { nav.navigate(Routes.CREATE) },
+                        onMyPuzzles = { nav.navigate(Routes.MY_PUZZLES) },
                     )
                 }
                 composable(Routes.DIFFICULTY) {
@@ -106,6 +112,28 @@ fun TesseraApp() {
                             }
                         },
                         onHome = { nav.popBackStack(Routes.HOME, false) },
+                    )
+                }
+                composable(Routes.CREATE) {
+                    CreateFlowHost(
+                        gameViewModel = vm,
+                        onCancel = { nav.popBackStack() },
+                        onReady = { puzzleId, difficulty ->
+                            nav.navigate(Routes.board(puzzleId, difficulty)) {
+                                popUpTo(Routes.HOME)
+                            }
+                        },
+                    )
+                }
+                composable(Routes.MY_PUZZLES) {
+                    MyPuzzlesScreen(
+                        game = vm,
+                        onBack = { nav.popBackStack() },
+                        // Play a saved custom puzzle at Medium by default; any size
+                        // is reachable via the size picker on create/replay.
+                        onPlay = { puzzleId ->
+                            nav.navigate(Routes.board(puzzleId, Difficulty.MEDIUM))
+                        },
                     )
                 }
             }
