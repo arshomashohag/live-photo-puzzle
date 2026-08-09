@@ -1,4 +1,4 @@
-package com.tessera.puzzle.model
+package com.tessera.puzzle.domain.model
 
 import kotlin.random.Random
 

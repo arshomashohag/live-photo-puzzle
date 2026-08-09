@@ -27,23 +27,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tessera.puzzle.domain.model.Difficulty
 import com.tessera.puzzle.game.GameViewModel
-import com.tessera.puzzle.model.Difficulty
+import com.tessera.puzzle.presentation.ContinueInfo
 import com.tessera.puzzle.ui.theme.DifficultyMeter
 import com.tessera.puzzle.ui.theme.GridPreview
 import com.tessera.puzzle.ui.theme.RegistrationFrame
 import com.tessera.puzzle.ui.theme.TesseraColors
 import com.tessera.puzzle.ui.theme.TesseraType
 
+private fun fmtTime(ms: Long?): String {
+    if (ms == null) return "—"
+    val s = ms / 1000
+    return "%02d:%02d".format(s / 60, s % 60)
+}
+
 @Composable
 fun HomeScreen(
     game: GameViewModel,
-    onContinue: () -> Unit,
+    onContinue: (ContinueInfo) -> Unit,
     onPickDifficulty: (Difficulty) -> Unit,
 ) {
+    val state by game.homeUiState.collectAsStateWithLifecycle()
     var coming by remember { mutableStateOf(false) }
     val scroll = rememberScrollState()
-    val board = game.board.value
 
     Column(
         Modifier
@@ -59,19 +67,29 @@ fun HomeScreen(
             Text("TESSERA", style = TesseraType.heading.copy(fontSize = 26.sp, color = TesseraColors.Ink))
         }
 
-        if (board != null && !board.isSolved) {
+        if (state.restoreNotice) {
+            Box(
+                Modifier.fillMaxWidth().background(TesseraColors.Mist).padding(10.dp)
+                    .clickable { game.consumeRestoreNotice() },
+            ) {
+                Text(
+                    "Couldn't restore your last puzzle.",
+                    style = TesseraType.body.copy(color = TesseraColors.SteelDeep),
+                )
+            }
+        }
+
+        val cont = state.continueInfo
+        if (cont != null) {
             Text("CONTINUE", style = TesseraType.label.copy(color = TesseraColors.Faint))
             RegistrationFrame(
-                Modifier.fillMaxWidth().height(110.dp).clickable { onContinue() },
+                Modifier.fillMaxWidth().height(110.dp).clickable { onContinue(cont) },
             ) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("${cont.puzzleName} · ${cont.difficulty.label}", style = TesseraType.cardTitle)
                     Text(
-                        "${board.puzzle.name} · ${board.difficulty.label}",
-                        style = TesseraType.cardTitle,
-                    )
-                    Text(
-                        "${board.difficulty.gridSize}×${board.difficulty.gridSize} · " +
-                            "${board.placedCount}/${board.difficulty.tileCount} placed",
+                        "${cont.difficulty.gridSize}×${cont.difficulty.gridSize} · " +
+                            "${cont.placed}/${cont.total} placed",
                         style = TesseraType.body.copy(color = TesseraColors.Muted),
                     )
                 }
@@ -80,9 +98,7 @@ fun HomeScreen(
 
         Box(
             Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .background(TesseraColors.Steel)
+                .fillMaxWidth().height(60.dp).background(TesseraColors.Steel)
                 .clickable { coming = true },
             contentAlignment = Alignment.Center,
         ) {
@@ -117,9 +133,9 @@ fun HomeScreen(
         }
 
         Row(Modifier.fillMaxWidth().height(64.dp).background(TesseraColors.Paper)) {
-            StatCell("SOLVED", "18", Modifier.weight(1f))
-            StatCell("BEST 3×3", "00:41", Modifier.weight(1f))
-            StatCell("CREATED", "7", Modifier.weight(1f))
+            StatCell("SOLVED", state.stats.solvedTotal.toString(), Modifier.weight(1f))
+            StatCell("BEST 3×3", fmtTime(state.stats.bestEasyTimeMillis), Modifier.weight(1f))
+            StatCell("CREATED", state.stats.createdCount.toString(), Modifier.weight(1f))
         }
     }
 }

@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,9 +30,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tessera.puzzle.domain.model.Difficulty
 import com.tessera.puzzle.game.GameViewModel
-import com.tessera.puzzle.model.Difficulty
 import com.tessera.puzzle.ui.theme.BlueprintButton
 import com.tessera.puzzle.ui.theme.TesseraColors
 import com.tessera.puzzle.ui.theme.TesseraType
@@ -49,19 +56,30 @@ fun BoardScreen(
     onSolved: () -> Unit,
     onExit: () -> Unit,
 ) {
+    val state by game.boardUiState.collectAsStateWithLifecycle()
+    val board = state.board
+    val tiles = state.tiles
+    var paused by remember { mutableStateOf(false) }
+
     LaunchedEffect(puzzleId, difficulty) {
-        val b = game.board.value
+        val b = game.boardUiState.value.board
         if (b == null || b.puzzle.id != puzzleId || b.difficulty != difficulty || b.isSolved) {
             game.startBoard(puzzleId, difficulty)
         }
     }
 
-    val board = game.board.value
-    val tiles = game.tiles.value
-    var paused by remember { mutableStateOf(false) }
-
     LaunchedEffect(board?.isSolved) {
         if (board != null && board.isSolved) onSolved()
+    }
+
+    // Forced save on lifecycle stop (BR-2).
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) game.flushSave()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     BackHandler(enabled = !paused) { paused = true }
@@ -105,11 +123,10 @@ fun BoardScreen(
             modifier = Modifier.fillMaxWidth().aspectRatio(1f).border(1.dp, TesseraColors.Ink),
             userScrollEnabled = false,
         ) {
-            items(
-                count = board.order.size,
-            ) { position ->
+            items(count = board.order.size) { position ->
                 val sourceIndex = board.order[position]
                 val selected = board.selected == position
+                val placed = sourceIndex == position
                 Box(
                     Modifier
                         .aspectRatio(1f)
@@ -117,7 +134,12 @@ fun BoardScreen(
                         .then(
                             if (selected) Modifier.border(3.dp, TesseraColors.Steel)
                             else Modifier.border(0.5.dp, TesseraColors.Hairline),
-                        ),
+                        )
+                        .semantics {
+                            contentDescription = "Tile ${position + 1}" +
+                                (if (selected) ", selected" else "") +
+                                (if (placed) ", in place" else "")
+                        },
                 ) {
                     val tile = tiles.getOrNull(sourceIndex)
                     if (tile != null) {

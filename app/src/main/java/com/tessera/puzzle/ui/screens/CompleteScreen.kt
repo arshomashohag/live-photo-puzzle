@@ -16,9 +16,12 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tessera.puzzle.domain.model.Difficulty
 import com.tessera.puzzle.game.GameViewModel
 import com.tessera.puzzle.ui.theme.BlueprintButton
 import com.tessera.puzzle.ui.theme.TesseraColors
@@ -30,9 +33,13 @@ private fun fmt(ms: Long): String {
 }
 
 @Composable
-fun CompleteScreen(game: GameViewModel, onNext: () -> Unit, onHome: () -> Unit) {
+fun CompleteScreen(
+    game: GameViewModel,
+    onNext: (Difficulty) -> Unit,
+    onHome: () -> Unit,
+) {
     BackHandler { onHome() }
-    val run = game.lastCompleted.value
+    val run by game.completeUiState.collectAsStateWithLifecycle()
 
     Box(
         Modifier
@@ -47,16 +54,26 @@ fun CompleteScreen(game: GameViewModel, onNext: () -> Unit, onHome: () -> Unit) 
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text("SOLVED", style = TesseraType.display.copy(color = TesseraColors.Paper))
-            if (run != null) {
-                Text(run.puzzle.name.uppercase(), style = TesseraType.heading.copy(color = TesseraColors.Sky))
+            run?.let { r ->
+                Text(r.puzzleName.uppercase(), style = TesseraType.heading.copy(color = TesseraColors.Sky))
                 Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                    Stat("TIME", fmt(run.elapsedMillis))
-                    Stat("MOVES", run.moves.toString())
-                    Stat("GRID", "${run.difficulty.gridSize}×${run.difficulty.gridSize}")
+                    Stat("TIME", fmt(r.elapsedMillis))
+                    Stat("MOVES", r.moves.toString())
+                    Stat("GRID", "${r.difficulty.gridSize}×${r.difficulty.gridSize}")
+                }
+                r.best?.let { b ->
+                    Text(
+                        "BEST ${fmt(b.bestTimeMillis)} · ${b.bestMoves} MOVES · SOLVED ${b.solvedCount}×",
+                        style = TesseraType.label.copy(color = TesseraColors.Sky),
+                    )
                 }
             }
             Spacer(Modifier.height(8.dp))
-            BlueprintButton("Next puzzle", onNext, Modifier.fillMaxWidth())
+            BlueprintButton(
+                "Next puzzle",
+                { run?.let { onNext(it.difficulty) } ?: onHome() },
+                Modifier.fillMaxWidth(),
+            )
             BlueprintButton("Home", onHome, Modifier.fillMaxWidth(), filled = false, foreground = TesseraColors.Paper)
         }
     }

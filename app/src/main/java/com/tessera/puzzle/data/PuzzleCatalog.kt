@@ -1,8 +1,8 @@
 package com.tessera.puzzle.data
 
 import com.tessera.puzzle.R
-import com.tessera.puzzle.model.Difficulty
-import com.tessera.puzzle.model.Puzzle
+import com.tessera.puzzle.domain.model.Difficulty
+import com.tessera.puzzle.domain.model.Puzzle
 
 object PuzzleCatalog {
 
