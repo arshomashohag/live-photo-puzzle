@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield (existing Phase-0 slice; production build-out ahead)
 - **Start Date**: 2026-08-09T10:21:33Z
-- **Current Stage**: CONSTRUCTION - Code Generation Part 1 (Planning) COMPLETE — awaiting plan approval → Part 2 (Generation)
+- **Current Stage**: CONSTRUCTION - Code Generation COMPLETE — awaiting approval → Build and Test
 - **Delivery**: One phase at a time (Q4=B); this cycle = Phase 1 (architecture + Room persistence)
 
 ## Workspace State
@@ -48,7 +48,7 @@
 - [x] NFR Requirements — COMPLETE
 - [x] NFR Design — COMPLETE
 - [~] Infrastructure Design — SKIP (no cloud)
-- [ ] Code Generation — EXECUTE
+- [x] Code Generation — COMPLETE (build + 19 unit/PBT tests green)
 - [ ] Build and Test — EXECUTE
 
 ## Execution Plan Summary
