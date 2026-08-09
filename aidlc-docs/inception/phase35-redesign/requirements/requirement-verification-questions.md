@@ -20,7 +20,7 @@ B) Keep the Settings as a full screen but restyle it to v2 (no drawer); Home gea
 
 C) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 2: The colorful per-level palette
 v2 gives each difficulty its own color (a "colourful level palette").
@@ -31,7 +31,7 @@ B) Keep one accent (coral) for all difficulties; just restyle shapes/typography
 
 C) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 3: Dark theme
 v2 includes its own dark theme (plum/dark-brown backgrounds, cream text, teal).
@@ -43,7 +43,7 @@ B) Ship light-only for the redesign; revisit dark later
 
 C) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 4: Animations / motion
 v2 uses playful motion (bob, pulse, rise) plus the existing sliding-swap.
@@ -54,7 +54,7 @@ B) Minimal motion — just the new look, skip decorative animations
 
 C) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 5: Fonts
 v2 uses Nunito (Google Fonts, weights 400–900).
@@ -63,7 +63,7 @@ A) Bundle Nunito .ttf files in res/font (offline, no runtime download) — repla
 
 B) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 6: The old blueprint assets
 v1's Barlow fonts and blueprint primitives (registration marks, square frames)
@@ -75,4 +75,4 @@ B) Keep them in the repo (dead) for now
 
 C) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
