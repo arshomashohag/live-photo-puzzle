@@ -3,15 +3,15 @@
 **Unit**: `phase1-persistence`
 
 ## Plan Checklist
-- [ ] Define domain entities (persistence-facing): PuzzleRecord, SavedBoard, PuzzleStats/BestScore, Settings
-- [ ] Define Room schema (entities, keys, indices, relationships) mapped from domain
-- [ ] Define domain↔entity mapping (round-trip) and repository interfaces
-- [ ] Define business rules: best-score (lowest time), bundled-puzzle seeding, completion recording, in-progress persistence, delete + file cleanup
-- [ ] Define data flow: app start → seed → load Continue/stats; play → autosave board; complete → record best; delete → row + files
-- [ ] Identify PBT-01 testable properties (engine invariants + mapping round-trips)
-- [ ] Collect answers to embedded questions; resolve ambiguities
-- [ ] Generate business-logic-model.md, business-rules.md, domain-entities.md
-- [ ] Security/Resiliency/PBT compliance summary in completion message
+- [x] Define domain entities (persistence-facing): PuzzleRecord, SavedBoard, PuzzleStats/BestScore, Settings
+- [x] Define Room schema (entities, keys, indices, relationships) mapped from domain
+- [x] Define domain↔entity mapping (round-trip) and repository interfaces
+- [x] Define business rules: best-score (lowest time), bundled-puzzle seeding, completion recording, in-progress persistence, delete + file cleanup
+- [x] Define data flow: app start → seed → load Continue/stats; play → autosave board; complete → record best; delete → row + files
+- [x] Identify PBT-01 testable properties (engine invariants + mapping round-trips)
+- [x] Collect answers to embedded questions; resolve ambiguities
+- [x] Generate business-logic-model.md, business-rules.md, domain-entities.md
+- [x] Security/Resiliency/PBT compliance summary in completion message
 
 ---
 
@@ -32,7 +32,7 @@ C) Debounced (e.g. batch writes at most every ~2s) plus on background — balanc
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 2: How many in-progress boards are retained?
 The Continue card resumes an in-progress puzzle. How many can be "in progress" at once?
@@ -43,7 +43,7 @@ B) One in-progress board per puzzle+difficulty (resume any previously-started pu
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: B
 
 ## Question 3: Best-score scope (the key the record is kept against)
 Best time is tracked per…
@@ -56,7 +56,7 @@ C) Both: per-puzzle+difficulty best AND a per-difficulty overall best
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 4: Home stats strip (currently hardcoded "18 / 00:41 / 7")
 The Home stats strip should show real data once persistence exists. What should the three cells be?
@@ -69,7 +69,7 @@ C) Keep the current labels but I'll refine exact metrics later — wire whatever
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 5: Corrupt / missing saved data handling (Resiliency)
 If a saved board or puzzle row is corrupt or its image file is missing on load, the app should…
@@ -80,7 +80,7 @@ B) Discard it but surface a small, friendly non-blocking notice ("Couldn't resto
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: B
 
 ## Question 6: Bundled puzzles in the database
 Bundled puzzles need to be represented uniformly with custom ones for stats/best-score. How?
@@ -91,4 +91,4 @@ B) Keep bundled puzzles purely in code (PuzzleCatalog) and store only *stats/bes
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
