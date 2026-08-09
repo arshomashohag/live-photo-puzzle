@@ -540,3 +540,20 @@
 **Context**: Phase 3.5 Workflow Planning complete; awaiting approval.
 
 ---
+
+## Phase 3.5 Redesign — Workflow Planning: Approval
+**Timestamp**: 2026-08-10T00:00:00Z
+**AI Prompt**: "Request Changes / Add Skipped Stages / Approve & Continue → Functional Design"
+**User Input**: "approve and continue to functional design"
+**AI Response**: "Redesign plan approved. v2 fully specified in requirements (token table + drawer + per-level palette) — no open functional questions; generating FD artifacts directly with PBT-01 for the per-level accent mapping."
+**Status**: Approved
+**Context**: Entering Phase 3.5 Functional Design.
+
+---
+
+## Phase 3.5 Redesign — Functional Design: Artifacts
+**Timestamp**: 2026-08-10T00:00:00Z
+**AI Response**: "Generated domain-entities.md (extended TesseraColorScheme v2 roles, TesseraShapes/Elevation, pure LevelPalette, v2 primitives PillButton/RoundedCard/Chip/Hero, drawer state), business-rules.md (BR35-1..BR35-9: token scheme, per-level accent EASY→teal/MEDIUM→coral/HARD→purple, rounded primitives, settings drawer replacing screen, reduced-motion motion, Nunito, cleanup, a11y preserved, no regressions), business-logic-model.md (LevelPalette + accentColor + shapes/type + drawer + DF35-1..4 + PBT-01 for per-level totality/distinctness). No open questions. Marked plan complete."
+**Context**: Phase 3.5 Functional Design complete; awaiting approval → NFR Requirements.
+
+---
