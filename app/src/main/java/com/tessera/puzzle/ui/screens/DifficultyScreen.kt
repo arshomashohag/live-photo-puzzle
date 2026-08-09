@@ -21,7 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tessera.puzzle.model.Difficulty
+import com.tessera.puzzle.domain.model.Difficulty
 import com.tessera.puzzle.ui.theme.DifficultyMeter
 import com.tessera.puzzle.ui.theme.GridPreview
 import com.tessera.puzzle.ui.theme.RegistrationFrame

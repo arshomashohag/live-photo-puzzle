@@ -4,14 +4,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.tessera.puzzle.game.GameViewModel
-import com.tessera.puzzle.model.Difficulty
+import com.tessera.puzzle.domain.model.Difficulty
 import com.tessera.puzzle.ui.screens.BoardScreen
 import com.tessera.puzzle.ui.screens.CompleteScreen
 import com.tessera.puzzle.ui.screens.DifficultyScreen
@@ -38,7 +38,9 @@ fun TesseraApp() {
     TesseraTheme {
         Surface(color = TesseraColors.Haze, modifier = Modifier.fillMaxSize()) {
             val nav = rememberNavController()
-            val game: GameViewModel = viewModel()
+            // One ViewModel shared across destinations (activity-scoped), so the
+            // board→complete handoff and Continue state are consistent.
+            val vm: GameViewModel = hiltViewModel()
             NavHost(navController = nav, startDestination = Routes.SPLASH) {
                 composable(Routes.SPLASH) {
                     SplashScreen(onDone = {
@@ -49,10 +51,9 @@ fun TesseraApp() {
                 }
                 composable(Routes.HOME) {
                     HomeScreen(
-                        game = game,
-                        onContinue = {
-                            val b = game.board.value ?: return@HomeScreen
-                            nav.navigate(Routes.board(b.puzzle.id, b.difficulty))
+                        game = vm,
+                        onContinue = { info ->
+                            nav.navigate(Routes.board(info.puzzleId, info.difficulty))
                         },
                         onPickDifficulty = { d -> nav.navigate(Routes.puzzleSelect(d)) },
                     )
@@ -69,9 +70,10 @@ fun TesseraApp() {
                 ) { entry ->
                     val d = Difficulty.valueOf(entry.arguments!!.getString("difficulty")!!)
                     PuzzleSelectScreen(
+                        game = vm,
                         difficulty = d,
                         onBack = { nav.popBackStack() },
-                        onPick = { p -> nav.navigate(Routes.board(p.id, d)) },
+                        onPick = { puzzleId -> nav.navigate(Routes.board(puzzleId, d)) },
                     )
                 }
                 composable(
@@ -84,7 +86,7 @@ fun TesseraApp() {
                     val pid = entry.arguments!!.getString("puzzleId")!!
                     val d = Difficulty.valueOf(entry.arguments!!.getString("difficulty")!!)
                     BoardScreen(
-                        game = game,
+                        game = vm,
                         puzzleId = pid,
                         difficulty = d,
                         onSolved = {
@@ -97,15 +99,10 @@ fun TesseraApp() {
                 }
                 composable(Routes.COMPLETE) {
                     CompleteScreen(
-                        game = game,
-                        onNext = {
-                            val run = game.lastCompleted.value
-                            if (run != null) {
-                                nav.navigate(Routes.puzzleSelect(run.difficulty)) {
-                                    popUpTo(Routes.HOME)
-                                }
-                            } else {
-                                nav.popBackStack(Routes.HOME, false)
+                        game = vm,
+                        onNext = { difficulty ->
+                            nav.navigate(Routes.puzzleSelect(difficulty)) {
+                                popUpTo(Routes.HOME)
                             }
                         },
                         onHome = { nav.popBackStack(Routes.HOME, false) },

@@ -1,4 +1,4 @@
-package com.tessera.puzzle.model
+package com.tessera.puzzle.domain.model
 
 enum class Difficulty(val gridSize: Int) {
     EASY(3),
