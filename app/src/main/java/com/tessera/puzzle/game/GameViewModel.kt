@@ -251,6 +251,11 @@ class GameViewModel @Inject constructor(
         _complete.value = null
     }
 
+    /** Delete a custom puzzle (row + files); bundled puzzles are rejected in the repo. */
+    fun deleteCustomPuzzle(puzzleId: String) {
+        viewModelScope.launch { puzzleRepository.deletePuzzle(puzzleId) }
+    }
+
     private companion object {
         const val DEBOUNCE_MS = 750L
     }
