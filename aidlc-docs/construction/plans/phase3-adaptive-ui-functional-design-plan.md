@@ -3,16 +3,16 @@
 **Unit**: `phase3-adaptive-ui`
 
 ## Plan Checklist
-- [ ] Define ThemeResolver (pure: ThemeMode + system-dark → effective dark)
-- [ ] Define dark color scheme (tokens for both themes)
-- [ ] Define adaptive rules (WindowSizeClass → columns/max-width/board cap)
-- [ ] Define reduced-motion rule
-- [ ] Define Settings screen behavior
-- [ ] Define accessibility semantics conventions
-- [ ] Identify PBT-01 properties (ThemeResolver)
-- [ ] Collect answers; resolve ambiguities
-- [ ] Generate business-logic-model.md, business-rules.md, domain-entities.md
-- [ ] Compliance summary
+- [x] Define ThemeResolver (pure: ThemeMode + system-dark → effective dark)
+- [x] Define dark color scheme (tokens for both themes)
+- [x] Define adaptive rules (WindowSizeClass → columns/max-width/board cap)
+- [x] Define reduced-motion rule
+- [x] Define Settings screen behavior
+- [x] Define accessibility semantics conventions
+- [x] Identify PBT-01 properties (ThemeResolver)
+- [x] Collect answers; resolve ambiguities
+- [x] Generate business-logic-model.md, business-rules.md, domain-entities.md
+- [x] Compliance summary
 
 ---
 
@@ -31,7 +31,7 @@ B) Introduce a distinct dark palette (describe in Other)
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 2: Expanded-width column counts
 On Expanded (tablet) screens, grids currently 2–3 columns. Target?
@@ -42,7 +42,7 @@ B) Keep current column counts, just center with max-width
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 3: Board maximum size
 Cap the centered board at…
@@ -53,7 +53,7 @@ B) 480 dp max
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 4: Settings — Reset stats
 Include a "Reset statistics" action in Settings this phase?
@@ -64,4 +64,4 @@ B) No — defer; Settings has only Theme + placeholder toggles this phase
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
