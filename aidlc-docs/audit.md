@@ -213,3 +213,12 @@
 **Context**: Build and Test complete; Phase 1 cycle finished. Operations stage is a placeholder; next work is a new AI-DLC cycle for Phase 2.
 
 ---
+
+## Change Request — Adjacent-only (edge-sharing) swaps
+**Timestamp**: 2026-08-09T10:21:33Z
+**User Input**: "Installed apk and it worked. One CR though, allow swap only the tiles sharing an edge, so max allowed swap count is 4, proceed to next phase"
+**AI Response**: "User confirmed the app installs and runs. CR: restrict swaps to edge-sharing (orthogonal) neighbors — interior tiles have up to 4 neighbors (corner 2, edge 3). Clarified via questions: (1) orthogonal, NO wrap; (2) keep guaranteed-solvable by generating scrambles as N random ADJACENT swaps from solved (adjacent-only reintroduces reachability/parity constraints, so a plain random permutation could be unsolvable). Treating as a gameplay-engine amendment: updating engine (adjacency + swap guard + solvable scramble), the Phase-1 functional-design PBT properties that referenced free swap/commutativity, and tests; then proceeding to Phase 2 planning per the user's 'proceed to next phase'. Build/tests re-verified."
+**Status**: Approved (implement CR, then proceed to Phase 2)
+**Context**: Gameplay rule change applied outside a full stage loop (small, user-directed); documented here + in engine/tests. Phase 2 AI-DLC cycle to follow."
+
+---

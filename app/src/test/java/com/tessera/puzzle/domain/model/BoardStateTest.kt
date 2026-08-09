@@ -45,6 +45,30 @@ class BoardStateTest {
     }
 
     @Test
+    fun tapTile_nonAdjacentReselectsInsteadOfSwapping() {
+        // On a 3x3, position 0 (row0,col0) and position 8 (row2,col2) are NOT
+        // edge-sharing. Tapping 8 while 0 is selected should move the selection
+        // to 8, not swap.
+        val start = board(intArrayOf(1, 0, 2, 3, 4, 5, 6, 7, 8))
+        val afterSelect0 = start.tapTile(0)
+        val afterTap8 = afterSelect0.tapTile(8)
+        assertEquals(8, afterTap8.selected)
+        assertEquals(0, afterTap8.moves)
+        // Order unchanged (no swap happened).
+        assertTrue(afterTap8.order.contentEquals(intArrayOf(1, 0, 2, 3, 4, 5, 6, 7, 8)))
+    }
+
+    @Test
+    fun tapTile_verticalNeighborSwaps() {
+        // Positions 0 (row0,col0) and 3 (row1,col0) share an edge on a 3x3.
+        val start = board(intArrayOf(3, 1, 2, 0, 4, 5, 6, 7, 8))
+        val swapped = start.tapTile(0).tapTile(3)
+        assertNull(swapped.selected)
+        assertEquals(1, swapped.moves)
+        assertTrue(swapped.isSolved)
+    }
+
+    @Test
     fun tapTile_sameTileDeselects() {
         val start = board(intArrayOf(1, 0, 2, 3, 4, 5, 6, 7, 8))
         val selected = start.tapTile(0)

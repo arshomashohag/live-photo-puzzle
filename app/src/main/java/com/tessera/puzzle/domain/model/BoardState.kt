@@ -16,18 +16,27 @@ class BoardState(
     val isSolved: Boolean
         get() = order.indices.all { order[it] == it }
 
+    /**
+     * Tap handling for edge-sharing (adjacent-only) swaps:
+     * - Nothing selected -> select [pos].
+     * - Tapping the selected tile -> deselect.
+     * - Tapping an orthogonal neighbor of the selected tile -> swap them.
+     * - Tapping any other (non-adjacent) tile -> move the selection to [pos]
+     *   (pick a new anchor) rather than perform an illegal long-range swap.
+     */
     fun tapTile(pos: Int): BoardState {
         val current = selected
-        return when (current) {
-            null -> copy(selected = pos)
-            pos -> copy(selected = null)
-            else -> {
+        return when {
+            current == null -> copy(selected = pos)
+            current == pos -> copy(selected = null)
+            Grid.areAdjacent(current, pos, difficulty.gridSize) -> {
                 val next = order.copyOf()
                 val tmp = next[current]
                 next[current] = next[pos]
                 next[pos] = tmp
                 copy(order = next, selected = null, moves = moves + 1)
             }
+            else -> copy(selected = pos)
         }
     }
 
