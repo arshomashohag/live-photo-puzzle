@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield (existing Phase-0 slice; production build-out ahead)
 - **Start Date**: 2026-08-09T10:21:33Z
-- **Current Stage**: CONSTRUCTION (Phase 2 cycle) - Code Generation Part 1 (Planning) COMPLETE — awaiting plan approval → Part 2
+- **Current Stage**: CONSTRUCTION (Phase 2 cycle) - Code Generation COMPLETE — awaiting approval → Build and Test
 - **Phase 1**: COMPLETE (architecture + Room persistence; adjacent-swap CR applied)
 - **Phase 2 plan**: EXECUTE = Functional Design, NFR Requirements, NFR Design, Code Generation, Build and Test; SKIP = User Stories, Application Design, Units Generation, Infrastructure Design (see phase2-custom-puzzles/plans/execution-plan.md)
 - **Delivery**: One phase at a time (Q4=B); this cycle = Phase 1 (architecture + Room persistence)
@@ -71,7 +71,7 @@
 - [x] NFR Requirements — COMPLETE
 - [x] NFR Design — COMPLETE
 - [~] Infrastructure Design — SKIP (no cloud)
-- [ ] Code Generation
+- [x] Code Generation — COMPLETE (build + 29 unit/PBT tests green)
 - [ ] Build and Test
 
 ## Extension Configuration
