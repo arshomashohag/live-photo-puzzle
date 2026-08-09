@@ -49,3 +49,12 @@
 **Context**: Requirements Analysis stage complete; entering Workflow Planning.
 
 ---
+
+## Workflow Planning — Tech-Stack Reuse Clarification
+**Timestamp**: 2026-08-09T10:21:33Z
+**User Input**: "for tech-stack, can we use kotlin and reuse the existing things already built?"
+**AI Response**: "Confirmed: stack stays Kotlin + Compose + Material 3; ALL existing work is reused (engine + 10 tests move model/→domain/ unchanged; 6 screens kept, only Home/Board/Complete adapt to StateFlow; theme/primitives/fonts/9 photos/PuzzleCatalog/ImageSlicer/build scaffolding all kept). Phase 1 only ADDS Jetpack libraries required by the approved spec (Room, Hilt, StateFlow, DataStore, Kotest) — additive, nothing discarded. Asked how much new library to add; user chose 'Add the full stack (as planned)'."
+**Status**: Confirmed — no plan change; reuse recorded explicitly.
+**Context**: Workflow Planning — tech-stack reuse confirmation.
+
+---
