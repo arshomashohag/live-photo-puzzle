@@ -3,15 +3,15 @@
 **Unit**: `phase2-custom-puzzles`
 
 ## Plan Checklist
-- [ ] Define image-processing pipeline (sample-size math, center-crop, thumbnail)
-- [ ] Define create flow state machine (chooser→capture/pick→review→size→generate→save→play)
-- [ ] Define permission state machine (granted/denied/permanently-denied/no-camera)
-- [ ] Define custom-puzzle naming + save (PuzzleRecord/FileRef reuse)
-- [ ] Define My-puzzles library + delete-with-confirm behaviors
-- [ ] Identify PBT-01 testable properties (image math — pure functions)
-- [ ] Collect answers; resolve ambiguities
-- [ ] Generate business-logic-model.md, business-rules.md, domain-entities.md
-- [ ] Security/Resiliency/PBT compliance summary
+- [x] Define image-processing pipeline (sample-size math, center-crop, thumbnail)
+- [x] Define create flow state machine (chooser→capture/pick→review→size→generate→save→play)
+- [x] Define permission state machine (granted/denied/permanently-denied/no-camera)
+- [x] Define custom-puzzle naming + save (PuzzleRecord/FileRef reuse)
+- [x] Define My-puzzles library + delete-with-confirm behaviors
+- [x] Identify PBT-01 testable properties (image math — pure functions)
+- [x] Collect answers; resolve ambiguities
+- [x] Generate business-logic-model.md, business-rules.md, domain-entities.md
+- [x] Security/Resiliency/PBT compliance summary
 
 ---
 
@@ -29,7 +29,7 @@ B) 512 px square thumbnail (sharper, slightly larger)
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 2: What happens to the full processed image after slicing
 The board is played from sliced tiles. The full ~1024px image is also saved.
@@ -41,7 +41,7 @@ B) Keep only tiles for the created size + thumbnail (smaller storage, but can't 
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 3: Capture failure / very small image handling
 If a captured or picked image is too small to make a decent 5×5 (e.g. < ~300px),
@@ -53,7 +53,7 @@ B) Accept anyway and upscale (may look blurry)
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 4: Generating screen behavior
 The "Generating" step processes + slices the image. On a fast device this is
@@ -65,7 +65,7 @@ B) Skip the Generating screen when processing is fast (< ~300ms); show it only i
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 5: My-puzzles ordering
 The library grid orders saved puzzles by…
@@ -78,4 +78,4 @@ C) Alphabetical by name
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A

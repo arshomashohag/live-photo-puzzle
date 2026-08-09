@@ -275,3 +275,11 @@
 **Context**: Entering Phase 2 Functional Design."
 
 ---
+
+## Phase 2 Cycle — Functional Design: Artifacts Generated
+**Timestamp**: 2026-08-09T10:21:33Z
+**User Input**: "use your recommendations"
+**AI Response**: "Recorded FD answers (A×5): 256px thumbnail, keep full processed image (enables replay at any size), reject too-small/undecodable with friendly message, always show Generating >=500ms, library newest-first. Generated domain-entities.md (PhotoSource, ImportSpec, SampleSizeResult, CropRect, ImportedPuzzle, CreateState machine, namer), business-rules.md (BR2-1..BR2-12), business-logic-model.md (pure ImageMath + CustomPuzzleNamer, PhotoImporter/CameraController/CreateViewModel interfaces, DF2-1..DF2-5, and PBT-01 table targeting the pure image math). Reuses Phase-1 PuzzleRecord/FileRef/repo/filestore/engine. Marked FD plan complete."
+**Context**: Phase 2 Functional Design complete; awaiting approval → NFR Requirements.
+
+---
