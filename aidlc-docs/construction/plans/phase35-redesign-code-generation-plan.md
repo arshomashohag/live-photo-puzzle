@@ -43,19 +43,21 @@ Docs → `aidlc-docs/construction/phase35-redesign/code/`.
   restyled (rounded), `GridPreview` restyled (rounded tiles).
 
 ## Step 5: Restyle browse/home screens
-- [x] `SplashScreen`: rounded gradient icon (bob if motion), Nunito wordmark.
-- [x] `HomeScreen`: rounded hero header w/ menu (drawer) + create pill; continue
-  card (RoundedCard); difficulty cards use per-level gradient; My-puzzles pill;
-  stats as chips/rounded row.
-- [x] `DifficultyScreen`, `PuzzleSelectScreen`: RoundedCard grid, per-level accent,
-  Chip labels.
+NOTE: Because the `TesseraColors` accessor names + primitive names were kept
+stable and repointed to v2, ALL screens flip to v2 colors/Nunito/rounded cards
+automatically. Explicit per-screen touches done: Home + Difficulty per-level
+accents; drawer trigger on Home. Splash/Select got the v2 look via the theme but
+did NOT get bespoke gradient-icon/hero treatments — those refinements are
+deferred (see Known Limitations).
+- [x] `HomeScreen`: menu→drawer; difficulty cards use per-level accent; v2 theme.
+- [x] `DifficultyScreen`: per-level accent on grid/meter; v2 theme.
+- [~] `SplashScreen`, `PuzzleSelectScreen`: inherit v2 theme; bespoke
+  gradient-icon / hero-gradient refinements deferred.
 
 ## Step 6: Restyle board/complete/create/library/states
-- [x] `BoardScreen`(+Pause/Complete): rounded board container, per-level accent
-  ring on selected tile, pill buttons, rounded overlay cards.
-- [x] create/* (Chooser, Camera controls, Review, PickSize, Generating,
-  Permission): pill buttons, RoundedCards, gradient generating.
-- [x] `MyPuzzlesScreen`: RoundedCards, pill delete confirm; empty state playful.
+- [~] Board/Complete/create/*/MyPuzzles/states: inherit v2 theme (rounded cards,
+  Nunito, coral). Bespoke per-screen touches (accent ring on tiles, gradient
+  generating, playful empty art) deferred — functional and on-brand via tokens.
 
 ## Step 7: Settings drawer (replaces Settings screen)
 - [x] `ui/screens/SettingsDrawerContent.kt` (theme options as chips/rows,
