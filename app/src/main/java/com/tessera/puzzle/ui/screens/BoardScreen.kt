@@ -38,6 +38,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tessera.puzzle.domain.model.Difficulty
+import com.tessera.puzzle.domain.model.Grid
 import com.tessera.puzzle.game.GameViewModel
 import com.tessera.puzzle.ui.theme.BlueprintButton
 import com.tessera.puzzle.ui.theme.TesseraColors
@@ -123,21 +124,32 @@ fun BoardScreen(
             modifier = Modifier.fillMaxWidth().aspectRatio(1f).border(1.dp, TesseraColors.Ink),
             userScrollEnabled = false,
         ) {
+            val sel = board.selected
+            val swappable = if (sel != null) {
+                Grid.neighbors(sel, difficulty.gridSize).toSet()
+            } else {
+                emptySet()
+            }
             items(count = board.order.size) { position ->
                 val sourceIndex = board.order[position]
                 val selected = board.selected == position
+                val canSwap = position in swappable
                 val placed = sourceIndex == position
                 Box(
                     Modifier
                         .aspectRatio(1f)
                         .clickable { game.tap(position) }
                         .then(
-                            if (selected) Modifier.border(3.dp, TesseraColors.Steel)
-                            else Modifier.border(0.5.dp, TesseraColors.Hairline),
+                            when {
+                                selected -> Modifier.border(3.dp, TesseraColors.Steel)
+                                canSwap -> Modifier.border(2.dp, TesseraColors.Sky)
+                                else -> Modifier.border(0.5.dp, TesseraColors.Hairline)
+                            },
                         )
                         .semantics {
                             contentDescription = "Tile ${position + 1}" +
                                 (if (selected) ", selected" else "") +
+                                (if (canSwap) ", swappable" else "") +
                                 (if (placed) ", in place" else "")
                         },
                 ) {

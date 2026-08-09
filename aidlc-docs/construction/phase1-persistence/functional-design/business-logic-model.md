@@ -72,15 +72,21 @@ engine (`domain/`) is unchanged; the ViewModel orchestrates engine + repos.
 Framework: **Kotest Property Testing** (Kotlin). Seeded/reproducible (PBT-08);
 complements example-based tests (PBT-10).
 
-### Engine (pure domain)
+### Engine (pure domain) — adjacent-only (edge-sharing) swap rule
 | Property | Category | Statement |
 |---|---|---|
-| Scramble validity | Invariant | For all tileCounts, `scramble(n)` is a permutation of `0..n-1` (each index once). |
+| Scramble validity | Invariant | For all perfect-square tileCounts, `scramble(n)` is a permutation of `0..n-1`. |
 | Scramble non-identity | Invariant | For all seeds, `scramble(n)` ≠ identity. |
-| Swap is involutive | Round-trip | Swapping (a,b) then (a,b) again returns the original `order`. |
-| Swap commutative on order | Invariant | Result of swapping positions a,b is independent of tap order (A-then-B == B-then-A). |
-| Solved oracle | Verification / Easy-verify | A board is solved **iff** `order[i]==i` ∀ i; applying the swap sequence that sorts `order` reaches solved. |
-| placedCount monotonic bound | Invariant | `placedCount` ∈ `0..tileCount`, equals tileCount iff solved. |
+| Scramble solvable | Verification | The board is solvable using only legal edge-sharing swaps (proved constructively by snake-path bubble sort). |
+| Adjacent swap involutive | Round-trip | Swapping an edge-sharing pair (a,b) twice returns the original `order`. |
+| Non-adjacent tap re-selects | Invariant | Tapping a non-adjacent tile while one is selected moves the selection and never mutates `order`. |
+| placedCount bound | Invariant | `placedCount` ∈ `0..tileCount`, equals tileCount iff solved. |
+
+**Rule note (CR):** swaps are restricted to orthogonal edge-sharing neighbors
+(no diagonals, no wrap) — a selected tile can swap with at most 4 (interior),
+3 (edge), or 2 (corner) tiles. Because adjacent transpositions generate the full
+symmetric group, every board remains solvable; scrambles are generated via
+random adjacent swaps to keep difficulty controlled and avoid near-solved starts.
 
 ### Persistence mapping (data)
 | Property | Category | Statement |

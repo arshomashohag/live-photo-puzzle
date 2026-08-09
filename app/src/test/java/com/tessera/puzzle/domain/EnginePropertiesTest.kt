@@ -2,6 +2,7 @@ package com.tessera.puzzle.domain
 
 import com.tessera.puzzle.domain.model.BoardState
 import com.tessera.puzzle.domain.model.Difficulty
+import com.tessera.puzzle.domain.model.Grid
 import com.tessera.puzzle.domain.model.Puzzle
 import com.tessera.puzzle.domain.model.scramble
 import com.tessera.puzzle.domain.validation.BoardValidator
@@ -17,18 +18,18 @@ import io.kotest.property.checkAll
 import kotlin.random.Random
 
 /**
- * Property-based tests (PBT) for the pure engine. Complements the example-based
- * JUnit4 tests (PBT-10). Kotest provides generation, shrinking, and seeded
- * reproducibility (PBT-07/08).
+ * Property-based tests (PBT) for the pure engine under the adjacent-only
+ * (edge-sharing) swap rule. Complements example-based JUnit4 tests (PBT-10).
+ * Kotest provides generation, shrinking, and seeded reproducibility (PBT-07/08).
  */
 class EnginePropertiesTest : StringSpec({
 
-    val tileCounts = listOf(9, 16, 25)
+    val sizes = listOf(3 to 9, 4 to 16, 5 to 25)
     val puzzle = Puzzle("p", "Test", 0)
 
     "scramble is a valid permutation (invariant)" {
         checkAll(Arb.long()) { seed ->
-            for (n in tileCounts) {
+            for ((_, n) in sizes) {
                 val order = scramble(n, Random(seed))
                 order.size shouldBe n
                 order.sorted() shouldBe (0 until n).toList()
@@ -38,78 +39,127 @@ class EnginePropertiesTest : StringSpec({
 
     "scramble is never the identity (invariant)" {
         checkAll(Arb.long()) { seed ->
-            for (n in tileCounts) {
+            for ((_, n) in sizes) {
                 val order = scramble(n, Random(seed))
                 (0 until n).any { order[it] != it }.shouldBeTrue()
             }
         }
     }
 
+    "scramble is solvable using only legal adjacent swaps (verification)" {
+        // Adjacent transpositions generate the full symmetric group (bubble
+        // sort reaches any permutation using only adjacent swaps), so every
+        // board is solvable. Verify constructively by row-major bubble sort,
+        // where each swap is a legal edge-sharing move via tapTile.
+        checkAll(Arb.long()) { seed ->
+            for ((gridSize, n) in sizes) {
+                var b = board(puzzle, scramble(n, Random(seed)), gridSizeToDiff(gridSize))
+                b = bubbleSortAdjacent(b, n)
+                b.isSolved.shouldBeTrue()
+            }
+        }
+    }
+
     "isValidOrder accepts scrambles and rejects malformed (invariant)" {
         checkAll(Arb.long()) { seed ->
-            for (n in tileCounts) {
+            for ((_, n) in sizes) {
                 val order = scramble(n, Random(seed))
                 BoardValidator.isValidOrder(order, n).shouldBeTrue()
-                // Break the permutation: duplicate an index.
                 val broken = order.copyOf().also { it[0] = it[1] }
                 BoardValidator.isValidOrder(broken, n).shouldBeFalse()
             }
         }
     }
 
-    "swap is involutive — swapping the same pair twice restores order (round-trip)" {
-        checkAll(Arb.long(), Arb.int(0, 8), Arb.int(0, 8)) { seed, rawA, rawB ->
-            val n = 9
+    "adjacent swap is involutive — swapping the same neighbor pair twice restores order (round-trip)" {
+        checkAll(Arb.long(), Arb.int(0, 8)) { seed, rawA ->
+            val gridSize = 3
+            val n = gridSize * gridSize
             val order = scramble(n, Random(seed))
             val a = rawA % n
+            val neighbors = Grid.neighbors(a, gridSize)
+            val b = neighbors[(seed.toInt().mod(neighbors.size))]
+            val base = board(puzzle, order)
+            val once = base.tapTile(a).tapTile(b)
+            val twice = once.tapTile(a).tapTile(b)
+            twice.order.toList() shouldBe order.toList()
+        }
+    }
+
+    "non-adjacent tap re-selects and never mutates order (invariant)" {
+        checkAll(Arb.long(), Arb.int(0, 8), Arb.int(0, 8)) { seed, rawA, rawB ->
+            val gridSize = 3
+            val n = gridSize * gridSize
+            val a = rawA % n
             val b = rawB % n
-            if (a != b) {
-                val base = board(puzzle, order)
-                // Tap a (select), tap b (swap), tap a (select), tap b (swap back).
-                val once = base.tapTile(a).tapTile(b)
-                val twice = once.tapTile(a).tapTile(b)
-                twice.order.toList() shouldBe order.toList()
+            if (a != b && !Grid.areAdjacent(a, b, gridSize)) {
+                val order = scramble(n, Random(seed))
+                val after = board(puzzle, order).tapTile(a).tapTile(b)
+                after.selected shouldBe b
+                after.order.toList() shouldBe order.toList()
             }
         }
     }
 
-    "swap is order-independent — A then B equals B then A (commutativity)" {
-        checkAll(Arb.long(), Arb.int(0, 8), Arb.int(0, 8)) { seed, rawA, rawB ->
-            val n = 9
-            val order = scramble(n, Random(seed))
-            val a = rawA % n
-            val b = rawB % n
-            if (a != b) {
-                val ab = board(puzzle, order).tapTile(a).tapTile(b)
-                val ba = board(puzzle, order).tapTile(b).tapTile(a)
-                ab.order.toList() shouldBe ba.order.toList()
-            }
-        }
-    }
-
-    "solved oracle — sorting via swaps reaches solved; placedCount in bounds" {
+    "placedCount stays in bounds; equals tileCount iff solved (invariant)" {
         checkAll(Arb.long()) { seed ->
             val n = 9
-            var b = board(puzzle, scramble(n, Random(seed)))
+            val b = board(puzzle, scramble(n, Random(seed)))
             b.placedCount shouldBeInRange 0..n
-            // Selection-sort the board using swaps: place value i at position i.
-            for (i in 0 until n) {
-                if (b.order[i] != i) {
-                    val j = (i until n).first { b.order[it] == i }
-                    b = b.tapTile(i).tapTile(j)
-                }
-            }
-            b.isSolved.shouldBeTrue()
-            b.placedCount shouldBe n
+            (b.placedCount == n) shouldBe b.isSolved
         }
     }
 })
 
-private fun board(puzzle: Puzzle, order: IntArray) = BoardState(
+private fun gridSizeToDiff(gridSize: Int): Difficulty = when (gridSize) {
+    3 -> Difficulty.EASY
+    4 -> Difficulty.MEDIUM
+    else -> Difficulty.HARD
+}
+
+private fun board(
+    puzzle: Puzzle,
+    order: IntArray,
+    difficulty: Difficulty = Difficulty.EASY,
+) = BoardState(
     puzzle = puzzle,
-    difficulty = Difficulty.EASY,
+    difficulty = difficulty,
     order = order,
     selected = null,
     moves = 0,
     elapsedMillis = 0L,
 )
+
+/**
+ * Solves a board using only legal edge-sharing swaps, proving solvability.
+ *
+ * Traverses a "snake" Hamiltonian path (row 0 L→R, row 1 R→L, …) whose
+ * consecutive positions are always orthogonal grid neighbors, then bubble-sorts
+ * along that path. The target is the solved board (value v at position v), so a
+ * value's desired rank along the path is the path-index of the position equal to
+ * that value. Adjacent transpositions along a Hamiltonian path generate the full
+ * symmetric group, so this reaches solved for any input permutation.
+ */
+private fun bubbleSortAdjacent(start: BoardState, n: Int): BoardState {
+    val gridSize = Math.round(Math.sqrt(n.toDouble())).toInt()
+    val path = ArrayList<Int>(n)
+    for (row in 0 until gridSize) {
+        val cols = if (row % 2 == 0) (0 until gridSize) else (gridSize - 1 downTo 0)
+        for (col in cols) path.add(row * gridSize + col)
+    }
+    // desiredRank[value] = index along the path of the position that value belongs to.
+    val desiredRank = IntArray(n)
+    for (k in 0 until n) desiredRank[path[k]] = k
+
+    var b = start
+    repeat(n) {
+        for (k in 0 until n - 1) {
+            val posA = path[k]
+            val posB = path[k + 1]
+            if (desiredRank[b.order[posA]] > desiredRank[b.order[posB]]) {
+                b = b.tapTile(posA).tapTile(posB)
+            }
+        }
+    }
+    return b
+}
