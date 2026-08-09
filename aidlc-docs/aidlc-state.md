@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield (existing Phase-0 slice; production build-out ahead)
 - **Start Date**: 2026-08-09T10:21:33Z
-- **Current Stage**: CONSTRUCTION (Phase 2 cycle) - NFR Requirements COMPLETE — awaiting approval → NFR Design
+- **Current Stage**: CONSTRUCTION (Phase 2 cycle) - NFR Design COMPLETE — awaiting approval → Code Generation
 - **Phase 1**: COMPLETE (architecture + Room persistence; adjacent-swap CR applied)
 - **Phase 2 plan**: EXECUTE = Functional Design, NFR Requirements, NFR Design, Code Generation, Build and Test; SKIP = User Stories, Application Design, Units Generation, Infrastructure Design (see phase2-custom-puzzles/plans/execution-plan.md)
 - **Delivery**: One phase at a time (Q4=B); this cycle = Phase 1 (architecture + Room persistence)
@@ -58,10 +58,21 @@
 - **Stages to Execute**: Functional Design, NFR Requirements, NFR Design, Code Generation, Build and Test
 - **Stages to Skip**: Reverse Engineering, User Stories, Application Design, Units Generation, Infrastructure Design (rationale in execution-plan.md)
 - **Plan doc**: aidlc-docs/inception/plans/execution-plan.md
-- [ ] User Stories
-- [ ] Workflow Planning
-- [ ] Application Design
-- [ ] Units Generation
+
+## Phase 2 Cycle Progress (Custom Photo Puzzles)
+### 🔵 INCEPTION
+- [x] Requirements Analysis
+- [~] User Stories (SKIP)
+- [x] Workflow Planning
+- [~] Application Design (SKIP)
+- [~] Units Generation (SKIP)
+### 🟢 CONSTRUCTION
+- [x] Functional Design — COMPLETE
+- [x] NFR Requirements — COMPLETE
+- [x] NFR Design — COMPLETE
+- [~] Infrastructure Design — SKIP (no cloud)
+- [ ] Code Generation
+- [ ] Build and Test
 
 ## Extension Configuration
 | Extension | Enabled | Decided At |
