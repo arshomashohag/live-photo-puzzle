@@ -618,3 +618,35 @@
 **Context**: Phase 3.5 Code Generation complete; awaiting approval → Build and Test.
 
 ---
+
+## Phase 4 CR — UI/Contrast, Image-loading Bug, Swipe Interaction (Requirements Analysis)
+**Timestamp**: 2026-08-10T00:00:00Z
+**User Input**: "## Change Request: UI Accessibility, Image Processing & Puzzle Interaction Improvements [full multi-part CR: (1) Light theme text/background contrast — Resume modal + others; (2) Button text alignment — Theme chips + all buttons; (3) CRITICAL: gallery/camera images fail to become puzzle tiles ('Couldn't read the file'); (4) Replace tap-to-swap with swipe-to-swap + polished animation; (5) regression testing. Fix underlying causes, keep architecture/design system, add regression tests.]"
+**AI Response**: "Investigated all four before planning. ROOT CAUSES FOUND: (3) The custom (file-backed) puzzle PLAY path was never implemented — stubbed in Phase 2 at three points: GameViewModel.toEnginePuzzle() returns `null` for ImageRef.FileRef ('// Phase 2'), so startBoard() bails; the engine `Puzzle` model holds only a @DrawableRes Int (no file support); ImageSlicer.slice() only decodes from resources (decodeResource), not a file path. Import succeeds+saves but board never loads → error surfaced to user. NOT a URI-permission problem at import time. (1) PauseOverlay uses SplashBg (=canvas) backdrop with Paper (=surface, near-white) text; in LIGHT theme canvas #FFE9DA vs surface #FFF6EF = near-white-on-cream, unreadable. Overlay assumed a dark backdrop from v1. AlertDialog uses default Material colors. (2) Drawer theme chips (SettingsDrawerContent Box lines 62-77) have no contentAlignment/centered Text → label top-start, not centered. (4) Board uses tap-to-swap (game.tap on click); adjacent-swap engine rules to be preserved, change only interaction model to swipe + animated transition."
+**Context**: New construction cycle (Phase 4). Requirements Analysis — diagnosis recorded; presenting plan for approval.
+
+---
+
+## Phase 4 CR — Decisions
+**Timestamp**: 2026-08-10T00:05:00Z
+**User Input**: "Swipe model = Directional flick; Cycle depth = Streamlined"
+**AI Response**: "Locked: (#4) directional-flick swipe — touch a tile, swipe up/down/left/right; the edge-adjacent neighbor in that direction swaps in with an animated slide. Both fast flicks and slow drags accepted (velocity OR distance threshold); swipe toward a board edge (no neighbor) = no-op, no move counted. Engine adjacent-swap rules preserved. Depth: Streamlined — one combined design+plan doc; implement all four with build/test/lint gates + regression tests."
+**Context**: Phase 4 — proceeding to combined design+plan.
+
+---
+
+## Phase 4 CR — Approval + Implementation
+**Timestamp**: 2026-08-10T00:10:00Z
+**User Input**: "approve, implement all four"
+**AI Response**: "Approved. Implementing A (critical file-backed play bug) → B (contrast) → C (alignment) → D (swipe) → E (tests+build), with build/test/lint gates."
+**Context**: Phase 4 Code Generation — executing plan.
+
+---
+
+## Phase 4 CR — Code Generation Complete
+**Timestamp**: 2026-08-10T00:30:00Z
+**User Input**: (implementation of approved plan)
+**AI Response**: "Implemented all four. A (critical): added Puzzle.imagePath, ImageSlicer.slice(path,gridSize) bounded decode, GameViewModel FileRef→playable with filesExist guard + recoverable BoardUiState.error + BoardErrorOverlay. B (contrast): PauseOverlay→surface card+ink over scrim; heroGradient for Splash/Complete/Generating with OnHero white; Paper→OnPrimary on coral badges/CTA; new TesseraDialog themes both confirm dialogs; darkened light faint/muted for ~4.5:1. C (alignment): drawer theme chips centered; hand-rolled buttons→PillButton (Home CTA, create error/permission, Complete). D (swipe): Grid.neighborInDirection+Direction enum, BoardState.swipe reusing adjacent-swap, GameViewModel.swipe, board pointerInput flick/drag (24dp threshold, one-move-per-gesture, ignore-while-animating), 200ms graphicsLayer slide honoring reduced-motion; engine rules unchanged. E: SwipePropertiesTest PBT (swipe==two-tap, edge no-op, +1 move) + instrumented slice-into-tiles regression. VERIFICATION: testDebugUnitTest 40/40 pass, lintDebug 0 errors, assembleDebug OK (64MB apk)."
+**Context**: Phase 4 CR Code Generation complete; awaiting user review on-device.
+
+---

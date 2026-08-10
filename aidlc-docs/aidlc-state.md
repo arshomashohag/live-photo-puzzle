@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield (existing Phase-0 slice; production build-out ahead)
 - **Start Date**: 2026-08-09T10:21:33Z
-- **Current Stage**: CONSTRUCTION (Phase 3.5 redesign cycle) - Code Generation COMPLETE — awaiting approval → Build and Test
+- **Current Stage**: CONSTRUCTION (Phase 4 CR cycle) - Code Generation COMPLETE (critical image bug + contrast + alignment + swipe); 40/40 unit tests, lint 0, apk built — awaiting on-device review
 - **Phase 3**: COMPLETE (adaptive/dark/a11y)
 - **Phase 2**: COMPLETE (custom photo puzzles; lint clean; 29 tests)
 - **Phase 1**: COMPLETE (architecture + Room persistence; adjacent-swap CR applied)
