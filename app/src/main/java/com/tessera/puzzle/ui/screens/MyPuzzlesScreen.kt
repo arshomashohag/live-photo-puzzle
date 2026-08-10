@@ -18,9 +18,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +42,7 @@ import com.tessera.puzzle.game.GameViewModel
 import com.tessera.puzzle.ui.theme.rememberWindowSize
 import com.tessera.puzzle.ui.theme.RegistrationFrame
 import com.tessera.puzzle.ui.theme.TesseraColors
+import com.tessera.puzzle.ui.theme.TesseraDialog
 import com.tessera.puzzle.ui.theme.TesseraType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -84,19 +83,16 @@ fun MyPuzzlesScreen(
     }
 
     pendingDelete?.let { target ->
-        AlertDialog(
-            onDismissRequest = { pendingDelete = null },
-            title = { Text("Delete this puzzle?") },
-            text = { Text("\"${target.name}\" will be removed. This can't be undone.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    game.deleteCustomPuzzle(target.id)
-                    pendingDelete = null
-                }) { Text("DELETE") }
+        TesseraDialog(
+            title = "Delete this puzzle?",
+            message = "\"${target.name}\" will be removed. This can't be undone.",
+            confirmLabel = "DELETE",
+            destructive = true,
+            onConfirm = {
+                game.deleteCustomPuzzle(target.id)
+                pendingDelete = null
             },
-            dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) { Text("CANCEL") }
-            },
+            onDismiss = { pendingDelete = null },
         )
     }
 }

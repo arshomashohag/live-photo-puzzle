@@ -99,7 +99,7 @@ private fun PuzzleCard(
                     Box(
                         Modifier.padding(6.dp).background(TesseraColors.SteelDeep).padding(horizontal = 5.dp, vertical = 3.dp),
                     ) {
-                        Text("RESUME", style = TesseraType.label.copy(color = TesseraColors.Paper))
+                        Text("RESUME", style = TesseraType.label.copy(color = TesseraColors.OnPrimary))
                     }
                 }
             }

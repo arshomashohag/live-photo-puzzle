@@ -18,12 +18,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -31,6 +33,7 @@ import com.tessera.puzzle.domain.model.Difficulty
 import com.tessera.puzzle.ui.screens.BackBar
 import com.tessera.puzzle.ui.theme.DifficultyMeter
 import com.tessera.puzzle.ui.theme.GridPreview
+import com.tessera.puzzle.ui.theme.PillButton
 import com.tessera.puzzle.ui.theme.RegistrationFrame
 import com.tessera.puzzle.ui.theme.TesseraColors
 import com.tessera.puzzle.ui.theme.TesseraType
@@ -73,14 +76,20 @@ fun ImportGeneratingScreen() {
         animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse), label = "pulse",
     )
     Box(
-        Modifier.fillMaxSize().background(TesseraColors.SplashBg)
+        Modifier.fillMaxSize().background(TesseraColors.heroGradient)
             .windowInsetsPadding(WindowInsets.safeDrawing),
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-            Box(Modifier.width(96.dp).height(96.dp).alpha(pulse).background(TesseraColors.Paper))
-            Text("GENERATING", style = TesseraType.display.copy(color = TesseraColors.Paper))
-            Text("Slicing your photo into tiles", style = TesseraType.label.copy(color = TesseraColors.Sky))
+            Box(
+                Modifier.width(96.dp).height(96.dp).alpha(pulse)
+                    .clip(RoundedCornerShape(20.dp)).background(TesseraColors.OnHero),
+            )
+            Text("GENERATING", style = TesseraType.display.copy(color = TesseraColors.OnHero))
+            Text(
+                "Slicing your photo into tiles",
+                style = TesseraType.label.copy(color = TesseraColors.OnHero.copy(alpha = 0.85f)),
+            )
         }
     }
 }
@@ -93,13 +102,8 @@ fun CreateErrorScreen(message: String, onDismiss: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text(message, style = TesseraType.body)
-            Box(
-                Modifier.fillMaxWidth().height(56.dp).background(TesseraColors.Steel)
-                    .clickable { onDismiss() }
-                    .semantics { contentDescription = "OK" },
-                contentAlignment = Alignment.Center,
-            ) { Text("OK", style = TesseraType.heading.copy(color = TesseraColors.Paper)) }
+            Text(message, style = TesseraType.body.copy(color = TesseraColors.Ink))
+            PillButton("OK", onDismiss, Modifier.fillMaxWidth())
         }
     }
 }
@@ -116,20 +120,17 @@ fun PermissionNeededScreen(
             Text(
                 "Tessera needs camera access to take a photo for your puzzle. " +
                     "You can enable it in Settings, or choose an existing photo instead.",
-                style = TesseraType.body,
+                style = TesseraType.body.copy(color = TesseraColors.Ink),
             )
-            Box(
-                Modifier.fillMaxWidth().height(56.dp).background(TesseraColors.Steel)
-                    .clickable { onOpenSettings() }
-                    .semantics { contentDescription = "Open settings" },
-                contentAlignment = Alignment.Center,
-            ) { Text("OPEN SETTINGS", style = TesseraType.heading.copy(color = TesseraColors.Paper)) }
-            Box(
-                Modifier.fillMaxWidth().height(56.dp).background(TesseraColors.Paper)
-                    .clickable { onChoosePhoto() }
-                    .semantics { contentDescription = "Choose from photos" },
-                contentAlignment = Alignment.Center,
-            ) { Text("CHOOSE FROM PHOTOS", style = TesseraType.heading.copy(color = TesseraColors.Ink)) }
+            PillButton(
+                "Open settings", onOpenSettings,
+                Modifier.fillMaxWidth().semantics { contentDescription = "Open settings" },
+            )
+            PillButton(
+                "Choose from photos", onChoosePhoto,
+                Modifier.fillMaxWidth().semantics { contentDescription = "Choose from photos" },
+                filled = false,
+            )
         }
     }
 }

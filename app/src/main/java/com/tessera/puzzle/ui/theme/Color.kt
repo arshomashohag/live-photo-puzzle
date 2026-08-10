@@ -3,6 +3,8 @@ package com.tessera.puzzle.ui.theme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 /**
@@ -33,8 +35,8 @@ val lightScheme = TesseraColorScheme(
     surface = Color(0xFFFFF6EF),
     surfaceAlt = Color(0xFFF6EAE2),
     ink = Color(0xFF2E1F1A),
-    muted = Color(0xFF7A5C50),
-    faint = Color(0xFFA08076),
+    muted = Color(0xFF6E5147),
+    faint = Color(0xFF8A6A5E),
     primary = Color(0xFFF2603C),
     primaryLight = Color(0xFFFF9E5E),
     primaryDeep = Color(0xFFD64A28),
@@ -87,6 +89,24 @@ object TesseraColors {
     val Faint: Color @Composable @ReadOnlyComposable get() = LocalTesseraColors.current.faint
     val Hairline: Color @Composable @ReadOnlyComposable get() = LocalTesseraColors.current.hairline
     val SplashBg: Color @Composable @ReadOnlyComposable get() = LocalTesseraColors.current.canvas
+
+    /**
+     * v2 hero gradient (warm coral→pink). Dark enough for white ([OnPrimary])
+     * text in both themes — use for splash/complete/generating hero surfaces.
+     * Approximates the design's `160deg #FF9E5E→#F2603C→#E0447E`.
+     */
+    val heroGradient: Brush
+        @Composable @ReadOnlyComposable get() {
+            val s = LocalTesseraColors.current
+            return Brush.linearGradient(
+                colors = listOf(s.primaryLight, s.primary, s.pink),
+                start = Offset(0f, 0f),
+                end = Offset(0f, Float.POSITIVE_INFINITY),
+            )
+        }
+
+    /** Text/icon color that reads on [heroGradient] (always near-white). */
+    val OnHero: Color @Composable @ReadOnlyComposable get() = Color(0xFFFFFFFF)
 
     // New v2 roles (used by restyled screens).
     val Primary: Color @Composable @ReadOnlyComposable get() = LocalTesseraColors.current.primary

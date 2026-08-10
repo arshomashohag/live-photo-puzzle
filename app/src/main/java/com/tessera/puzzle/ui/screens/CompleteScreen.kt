@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tessera.puzzle.domain.model.Difficulty
 import com.tessera.puzzle.game.GameViewModel
-import com.tessera.puzzle.ui.theme.BlueprintButton
+import com.tessera.puzzle.ui.theme.PillButton
 import com.tessera.puzzle.ui.theme.TesseraColors
 import com.tessera.puzzle.ui.theme.TesseraType
 
@@ -44,7 +44,7 @@ fun CompleteScreen(
     Box(
         Modifier
             .fillMaxSize()
-            .background(TesseraColors.SplashBg)
+            .background(TesseraColors.heroGradient)
             .windowInsetsPadding(WindowInsets.safeDrawing),
         contentAlignment = Alignment.Center,
     ) {
@@ -53,9 +53,12 @@ fun CompleteScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("SOLVED", style = TesseraType.display.copy(color = TesseraColors.Paper))
+            Text("SOLVED", style = TesseraType.display.copy(color = TesseraColors.OnHero))
             run?.let { r ->
-                Text(r.puzzleName.uppercase(), style = TesseraType.heading.copy(color = TesseraColors.Sky))
+                Text(
+                    r.puzzleName.uppercase(),
+                    style = TesseraType.heading.copy(color = TesseraColors.OnHero.copy(alpha = 0.92f)),
+                )
                 Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                     Stat("TIME", fmt(r.elapsedMillis))
                     Stat("MOVES", r.moves.toString())
@@ -64,17 +67,17 @@ fun CompleteScreen(
                 r.best?.let { b ->
                     Text(
                         "BEST ${fmt(b.bestTimeMillis)} · ${b.bestMoves} MOVES · SOLVED ${b.solvedCount}×",
-                        style = TesseraType.label.copy(color = TesseraColors.Sky),
+                        style = TesseraType.label.copy(color = TesseraColors.OnHero.copy(alpha = 0.85f)),
                     )
                 }
             }
             Spacer(Modifier.height(8.dp))
-            BlueprintButton(
+            PillButton(
                 "Next puzzle",
                 { run?.let { onNext(it.difficulty) } ?: onHome() },
                 Modifier.fillMaxWidth(),
             )
-            BlueprintButton("Home", onHome, Modifier.fillMaxWidth(), filled = false, foreground = TesseraColors.Paper)
+            PillButton("Home", onHome, Modifier.fillMaxWidth(), filled = false, foreground = TesseraColors.Ink)
         }
     }
 }
@@ -82,7 +85,7 @@ fun CompleteScreen(
 @Composable
 private fun Stat(label: String, value: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(label, style = TesseraType.label.copy(color = TesseraColors.Faint))
-        Text(value, style = TesseraType.heading.copy(color = TesseraColors.Paper))
+        Text(label, style = TesseraType.label.copy(color = TesseraColors.OnHero.copy(alpha = 0.75f)))
+        Text(value, style = TesseraType.heading.copy(color = TesseraColors.OnHero))
     }
 }
