@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,7 +46,7 @@ fun SplashScreen(onDone: () -> Unit) {
     }
 
     Box(
-        Modifier.fillMaxSize().background(TesseraColors.SplashBg),
+        Modifier.fillMaxSize().background(TesseraColors.heroGradient),
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -52,7 +54,11 @@ fun SplashScreen(onDone: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             Box(
-                Modifier.alpha(alpha).size(96.dp).background(TesseraColors.Paper),
+                Modifier
+                    .alpha(alpha)
+                    .size(96.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(TesseraColors.OnHero),
                 contentAlignment = Alignment.Center,
             ) {
                 GridGlyph()
@@ -60,12 +66,12 @@ fun SplashScreen(onDone: () -> Unit) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     "TESSERA",
-                    style = TesseraType.display.copy(color = TesseraColors.Paper, fontSize = 46.sp),
+                    style = TesseraType.display.copy(color = TesseraColors.OnHero, fontSize = 46.sp),
                     textAlign = TextAlign.Center,
                 )
                 Text(
                     "PHOTO PUZZLE",
-                    style = TesseraType.label.copy(color = TesseraColors.Sky),
+                    style = TesseraType.label.copy(color = TesseraColors.OnHero.copy(alpha = 0.85f)),
                     modifier = Modifier.padding(top = 12.dp),
                 )
             }
@@ -87,8 +93,9 @@ private fun GridGlyph() {
                     Box(
                         Modifier
                             .size(16.dp)
+                            .clip(RoundedCornerShape(4.dp))
                             .alpha(o)
-                            .background(TesseraColors.SplashBg),
+                            .background(TesseraColors.Primary),
                     )
                 }
             }

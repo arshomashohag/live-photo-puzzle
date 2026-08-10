@@ -36,6 +36,7 @@ import com.tessera.puzzle.presentation.ContinueInfo
 import com.tessera.puzzle.ui.theme.accentColor
 import com.tessera.puzzle.ui.theme.DifficultyMeter
 import com.tessera.puzzle.ui.theme.GridPreview
+import com.tessera.puzzle.ui.theme.PillButton
 import com.tessera.puzzle.ui.theme.RegistrationFrame
 import com.tessera.puzzle.ui.theme.TesseraColors
 import com.tessera.puzzle.ui.theme.TesseraType
@@ -112,18 +113,11 @@ fun HomeScreen(
             }
         }
 
-        Box(
-            Modifier
-                .fillMaxWidth().heightIn(min = 60.dp).background(TesseraColors.Steel)
-                .clickable { onCreate() }
-                .padding(vertical = 12.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                "CREATE FROM CAMERA",
-                style = TesseraType.heading.copy(color = TesseraColors.Paper),
-            )
-        }
+        PillButton(
+            "Create from camera",
+            onCreate,
+            Modifier.fillMaxWidth().semantics { contentDescription = "Create from camera" },
+        )
 
         Text("CHOOSE A DIFFICULTY", style = TesseraType.label.copy(color = TesseraColors.Faint))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {

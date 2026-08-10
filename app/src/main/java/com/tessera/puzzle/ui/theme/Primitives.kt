@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -136,6 +138,40 @@ fun GridPreview(gridSize: Int, modifier: Modifier = Modifier, accent: Color = Te
                     drawRect(lineColor, topLeft = Offset(0f, i * step), size = Size(size.width, line))
                 }
             },
+    )
+}
+
+/**
+ * Theme-aware confirm dialog. Uses the warm v2 surface + ink text so it reads in
+ * both light and dark themes (Material defaults clash with the warm palette).
+ */
+@Composable
+fun TesseraDialog(
+    title: String,
+    message: String,
+    confirmLabel: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    destructive: Boolean = false,
+) {
+    val confirmColor = if (destructive) TesseraColors.Pink else TesseraColors.Primary
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = TesseraColors.Surface,
+        titleContentColor = TesseraColors.Ink,
+        textContentColor = TesseraColors.Muted,
+        title = { Text(title, style = TesseraType.cardTitle.copy(color = TesseraColors.Ink)) },
+        text = { Text(message, style = TesseraType.body.copy(color = TesseraColors.Muted)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(confirmLabel, style = TesseraType.label.copy(color = confirmColor))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("CANCEL", style = TesseraType.label.copy(color = TesseraColors.Muted))
+            }
+        },
     )
 }
 

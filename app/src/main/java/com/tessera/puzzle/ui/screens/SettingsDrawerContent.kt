@@ -15,10 +15,8 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,12 +27,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tessera.puzzle.domain.model.persistence.ThemeMode
 import com.tessera.puzzle.presentation.SettingsViewModel
 import com.tessera.puzzle.ui.theme.TesseraColors
+import com.tessera.puzzle.ui.theme.TesseraDialog
 import com.tessera.puzzle.ui.theme.TesseraShapes
 import com.tessera.puzzle.ui.theme.TesseraType
 
@@ -67,12 +67,14 @@ fun SettingsDrawerContent() {
                         .heightIn(min = 40.dp)
                         .padding(horizontal = 14.dp, vertical = 8.dp)
                         .semantics { contentDescription = "${mode.name.lowercase()} theme" },
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         mode.name.lowercase().replaceFirstChar { it.uppercase() },
                         style = TesseraType.label.copy(
                             color = if (selected) TesseraColors.OnPrimary else TesseraColors.Ink,
                         ),
+                        textAlign = TextAlign.Center,
                     )
                 }
             }
@@ -98,12 +100,13 @@ fun SettingsDrawerContent() {
     }
 
     if (confirmReset) {
-        AlertDialog(
-            onDismissRequest = { confirmReset = false },
-            title = { Text("Reset statistics?") },
-            text = { Text("Best times and solved counts will be cleared. Your saved puzzles are kept.") },
-            confirmButton = { TextButton(onClick = { vm.resetStats(); confirmReset = false }) { Text("RESET") } },
-            dismissButton = { TextButton(onClick = { confirmReset = false }) { Text("CANCEL") } },
+        TesseraDialog(
+            title = "Reset statistics?",
+            message = "Best times and solved counts will be cleared. Your saved puzzles are kept.",
+            confirmLabel = "RESET",
+            destructive = true,
+            onConfirm = { vm.resetStats(); confirmReset = false },
+            onDismiss = { confirmReset = false },
         )
     }
 }
