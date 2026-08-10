@@ -650,3 +650,35 @@
 **Context**: Phase 4 CR Code Generation complete; awaiting user review on-device.
 
 ---
+
+## Phase 4 (Audio & Haptics) — Kickoff / Requirements Analysis
+**Timestamp**: 2026-08-10T01:00:00Z
+**User Input**: "proceed for the next phases" → (chose) "Verify then proceed" + "P4 — Audio & haptics"; then "I've tested that. kick off the p4"
+**AI Response**: "User verified prior CR fixes on-device. Kicking off P4 audio & haptics AI-DLC cycle. Found: SettingsViewModel + SettingsRepository (DataStore) already persist soundEnabled/hapticsEnabled (default true) and expose set* — but NOTHING consumes them (no audio/haptic anywhere). Scope: build audio (tile move, puzzle complete) + haptics layer, gate on existing flags, wire to game events. Proceeding to Requirements Analysis doc."
+**Context**: New construction cycle phase4-audio-haptics; Requirements Analysis.
+
+---
+
+## Phase 4 (Audio & Haptics) — Requirements Decisions
+**Timestamp**: 2026-08-10T01:10:00Z
+**User Input**: "SFX source = AI-synthesized tones; No-op cue = Silent (nothing); Reduced-motion = Haptics stay on"
+**AI Response**: "Locked. (1) AI generates two tiny WAVs in res/raw (sfx_move soft click, sfx_complete short chime). (2) Edge/no-op swipe = no sound, no haptic. (3) Reduced-motion does NOT mute haptics (own toggle governs). Proceeding to combined design+plan (streamlined)."
+**Context**: phase4-audio-haptics Requirements complete → design+plan.
+
+---
+
+## Phase 4 (Audio & Haptics) — Approval + Implementation
+**Timestamp**: 2026-08-10T01:20:00Z
+**User Input**: "approve, implement all of p4"
+**AI Response**: "Approved. Implementing A (pure FeedbackDecider + PBT) → B (SoundPlayer/HapticPlayer/Controller + Hilt) → C (synthesized SFX) → D (wire GameViewModel + drawer) → E (tests+build)."
+**Context**: phase4-audio-haptics Code Generation.
+
+---
+
+## Phase 4 (Audio & Haptics) — Code Generation Complete
+**Timestamp**: 2026-08-10T01:45:00Z
+**User Input**: (implementation of approved plan)
+**AI Response**: "Implemented all of P4. Pure FeedbackDecider (event+flags→cue) with 5 Kotest PBTs; SoundPlayer (SoundPool, USAGE_GAME, load-fail no-op); HapticPlayer (VibratorManager/Vibrator SDK-safe, EFFECT_TICK + success waveform, no-vibrator no-op); FeedbackController @Singleton holding live sound/haptics flags; FeedbackModule @ApplicationScope. Synthesized res/raw/sfx_move.wav + sfx_complete.wav. Wired GameViewModel onMove (real swap in tap/swipe) + onComplete (onSolved); dropped drawer 'Coming soon'; added VIBRATE permission. VERIFICATION: testDebugUnitTest 45/45 pass, lintDebug 0 errors (it caught the missing VIBRATE permission → fixed), assembleDebug OK (Hilt graph resolves). Awaiting on-device review."
+**Context**: phase4-audio-haptics complete; awaiting on-device verification.
+
+---
