@@ -250,10 +250,14 @@ private fun PuzzleBoard(
                 Modifier
                     .aspectRatio(1f)
                     .then(
+                        // No neutral border: adjacent tiles would each draw an
+                        // inset hairline, producing a visible ~1px seam between
+                        // matching tiles. Only draw a border to highlight the
+                        // selected / swappable tiles during play.
                         when {
                             selected -> Modifier.border(3.dp, TesseraColors.Primary)
                             canSwap -> Modifier.border(2.dp, TesseraColors.PrimaryLight)
-                            else -> Modifier.border(0.5.dp, TesseraColors.Hairline)
+                            else -> Modifier
                         },
                     )
                     .semantics {
