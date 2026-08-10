@@ -6,7 +6,9 @@ import android.graphics.Color
 import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.tessera.puzzle.data.ImageSlicer
 import com.tessera.puzzle.data.files.PuzzleFileStore
+import com.tessera.puzzle.domain.model.Difficulty
 import com.tessera.puzzle.domain.model.persistence.ImageRef
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -66,5 +68,38 @@ class CustomPuzzleFlowTest {
         val importer = PhotoImporterImpl(context, fileStore, Dispatchers.Unconfined)
         val uri = writeTestImage(200) // below the 300px floor
         assertEquals(ImportResult.TooSmall, importer.import(uri, "x"))
+    }
+
+    /**
+     * Regression for the critical bug: a gallery/camera image must import AND
+     * then slice into exactly gridSize² playable tiles for every difficulty.
+     * The play path (ImageSlicer.slice(path, ...)) was previously unimplemented.
+     */
+    @Test
+    fun importedImage_slicesIntoTiles_forEveryDifficulty() = runTest {
+        val fileStore = PuzzleFileStore(context)
+        val importer = PhotoImporterImpl(context, fileStore, Dispatchers.Unconfined)
+
+        val uri = writeTestImage(1200)
+        val result = importer.import(uri, "Sliceable")
+        assertTrue("import should succeed", result is ImportResult.Success)
+        val ref = (result as ImportResult.Success).record.imageRef as ImageRef.FileRef
+
+        for (difficulty in Difficulty.entries) {
+            val tiles = ImageSlicer.slice(ref.imagePath, difficulty.gridSize)
+            assertEquals(
+                "tiles for ${difficulty.label}",
+                difficulty.tileCount,
+                tiles.size,
+            )
+        }
+
+        fileStore.deleteFiles(ref)
+    }
+
+    @Test
+    fun slice_missingFile_returnsEmpty_notCrash() {
+        val tiles = ImageSlicer.slice(File(context.cacheDir, "does_not_exist.jpg").absolutePath, 3)
+        assertTrue("missing file slices to empty (recoverable)", tiles.isEmpty())
     }
 }
