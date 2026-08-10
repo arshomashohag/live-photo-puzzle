@@ -39,11 +39,14 @@ class PhotoImporterImpl @Inject constructor(
         withContext(io) {
             val resolver = context.contentResolver
             try {
-                // Pass 1: bounds only (no pixel allocation).
+                // Pass 1: bounds only (no pixel allocation). decodeStream returns
+                // null by design when inJustDecodeBounds=true — it only fills
+                // outWidth/outHeight — so success is measured by the stream
+                // opening and the bounds being populated, NOT the decode result.
                 val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-                resolver.openInputStream(source)?.use {
-                    BitmapFactory.decodeStream(it, null, bounds)
-                } ?: return@withContext ImportResult.DecodeFailed
+                val boundsStream = resolver.openInputStream(source)
+                    ?: return@withContext ImportResult.DecodeFailed
+                boundsStream.use { BitmapFactory.decodeStream(it, null, bounds) }
 
                 val srcW = bounds.outWidth
                 val srcH = bounds.outHeight
