@@ -17,6 +17,7 @@ import com.tessera.puzzle.domain.model.persistence.PuzzleRecord
 import com.tessera.puzzle.domain.model.persistence.PuzzleSource
 import com.tessera.puzzle.domain.repository.PuzzleRepository
 import com.tessera.puzzle.domain.repository.StatsRepository
+import com.tessera.puzzle.feedback.FeedbackController
 import com.tessera.puzzle.presentation.BoardUiState
 import com.tessera.puzzle.presentation.CompleteUiState
 import com.tessera.puzzle.presentation.HomeUiState
@@ -48,6 +49,7 @@ class GameViewModel @Inject constructor(
     private val puzzleRepository: PuzzleRepository,
     private val statsRepository: StatsRepository,
     private val fileStore: PuzzleFileStore,
+    private val feedback: FeedbackController,
     @IoDispatcher private val io: CoroutineDispatcher,
     @DefaultDispatcher private val default: CoroutineDispatcher,
 ) : AndroidViewModel(app) {
@@ -110,9 +112,15 @@ class GameViewModel @Inject constructor(
     }
 
     fun startBoard(puzzleId: String, difficulty: Difficulty) {
+        // Clear any stale (possibly solved) board synchronously so the UI can't
+        // observe the previous solved state and flash the Complete screen while
+        // the fresh scramble loads asynchronously.
+        timerJob?.cancel()
+        _board.value = null
+        _tiles.value = emptyList()
+        _complete.value = null
+        _error.value = null
         viewModelScope.launch {
-            _error.value = null
-            _complete.value = null // clear any stale completion from a previous puzzle
             val record = puzzleRepository.getPuzzle(puzzleId)
             if (record == null) {
                 _error.value = "This puzzle is no longer available."
@@ -171,9 +179,12 @@ class GameViewModel @Inject constructor(
         if (b.isSolved) return
         val next = b.tapTile(pos)
         _board.value = next
+        val swapped = next.moves != b.moves
         if (next.isSolved) {
             timerJob?.cancel()
             onSolved(next)
+        } else if (swapped) {
+            feedback.onMove()
         }
     }
 
@@ -191,12 +202,15 @@ class GameViewModel @Inject constructor(
         if (next.isSolved) {
             timerJob?.cancel()
             onSolved(next)
+        } else {
+            feedback.onMove()
         }
     }
 
     fun consumeBoardError() { _error.value = null }
 
     private fun onSolved(board: BoardState) {
+        feedback.onComplete()
         viewModelScope.launch {
             statsRepository.recordCompletion(
                 board.puzzle.id, board.difficulty, board.elapsedMillis, board.moves,
