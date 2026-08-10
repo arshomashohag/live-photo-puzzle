@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +19,10 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +37,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tessera.puzzle.domain.model.layoutSpec
@@ -116,19 +122,28 @@ private fun CustomCard(p: PuzzleRecord, onPlay: () -> Unit, onDelete: () -> Unit
                         modifier = Modifier.fillMaxSize())
                 }
             }
-            androidx.compose.foundation.layout.Row(
-                Modifier.fillMaxWidth().padding(10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+            Row(
+                Modifier.fillMaxWidth().padding(start = 10.dp, end = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(p.name.uppercase(), style = TesseraType.cardTitle)
                 Text(
-                    "DELETE",
-                    style = TesseraType.label.copy(color = TesseraColors.Steel),
-                    modifier = Modifier.clickable { onDelete() }
-                        .semantics { contentDescription = "Delete ${p.name}" }
-                        .padding(4.dp),
+                    p.name.uppercase(),
+                    style = TesseraType.cardTitle,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
                 )
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.semantics { contentDescription = "Delete ${p.name}" },
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = null,
+                        tint = TesseraColors.Pink,
+                    )
+                }
             }
         }
     }
