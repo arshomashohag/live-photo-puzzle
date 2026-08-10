@@ -39,12 +39,32 @@ object ImageSlicer {
         return sliceBitmap(full, gridSize)
     }
 
+    /** Load a bundled drawable as a single center-cropped square image. */
+    fun loadFull(context: Context, @DrawableRes imageRes: Int): ImageBitmap? {
+        val full = BitmapFactory.decodeResource(context.resources, imageRes)
+            ?: return null
+        return cropSquareBitmap(full).asImageBitmap()
+    }
+
+    /**
+     * Load a saved image file as a single center-cropped square image. Bounded
+     * decode (inSampleSize) matches [slice] so the result lines up with tiles.
+     */
+    fun loadFull(imagePath: String): ImageBitmap? {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(imagePath, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+        val opts = BitmapFactory.Options().apply {
+            inSampleSize = computeInSampleSize(bounds.outWidth, bounds.outHeight)
+        }
+        val full = BitmapFactory.decodeFile(imagePath, opts) ?: return null
+        return cropSquareBitmap(full).asImageBitmap()
+    }
+
     private fun sliceBitmap(full: Bitmap, gridSize: Int): List<ImageBitmap> {
-        val side = min(full.width, full.height)
+        val square = cropSquareBitmap(full)
+        val side = square.width
         if (side < gridSize) return emptyList()
-        val left = (full.width - side) / 2
-        val top = (full.height - side) / 2
-        val square = Bitmap.createBitmap(full, left, top, side, side)
 
         // Pixel-perfect boundaries: tile k spans [bound(k), bound(k+1)).
         // Consecutive tiles share the exact edge (no gap, no overlap) and the
@@ -76,6 +96,14 @@ object ImageSlicer {
      */
     fun tileBounds(side: Int, gridSize: Int): IntArray =
         IntArray(gridSize + 1) { i -> ((i.toLong() * side) / gridSize).toInt() }
+
+    /** Center-crop [full] to its largest centered square. */
+    private fun cropSquareBitmap(full: Bitmap): Bitmap {
+        val side = min(full.width, full.height)
+        val left = (full.width - side) / 2
+        val top = (full.height - side) / 2
+        return Bitmap.createBitmap(full, left, top, side, side)
+    }
 
     private fun computeInSampleSize(width: Int, height: Int): Int {
         var sample = 1
