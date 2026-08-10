@@ -59,6 +59,10 @@ fun TesseraApp() {
         val scope = rememberCoroutineScope()
         ModalNavigationDrawer(
             drawerState = drawerState,
+            // Open via the Home settings button only; edge-swipe would conflict
+            // with the board's swipe-to-swap gesture. Swipe-to-close still works
+            // while the drawer is open.
+            gesturesEnabled = drawerState.isOpen,
             drawerContent = {
                 ModalDrawerSheet(drawerContainerColor = TesseraColors.Surface) {
                     SettingsDrawerContent()
@@ -133,11 +137,15 @@ fun TesseraApp() {
                     CompleteScreen(
                         game = vm,
                         onNext = { difficulty ->
+                            vm.consumeComplete()
                             nav.navigate(Routes.puzzleSelect(difficulty)) {
                                 popUpTo(Routes.HOME)
                             }
                         },
-                        onHome = { nav.popBackStack(Routes.HOME, false) },
+                        onHome = {
+                            vm.consumeComplete()
+                            nav.popBackStack(Routes.HOME, false)
+                        },
                     )
                 }
                 composable(Routes.CREATE) {

@@ -15,28 +15,21 @@ import com.tessera.puzzle.domain.model.Puzzle
 import com.tessera.puzzle.domain.model.persistence.ImageRef
 import com.tessera.puzzle.domain.model.persistence.PuzzleRecord
 import com.tessera.puzzle.domain.model.persistence.PuzzleSource
-import com.tessera.puzzle.domain.model.persistence.SavedBoard
-import com.tessera.puzzle.domain.repository.BoardRepository
 import com.tessera.puzzle.domain.repository.PuzzleRepository
 import com.tessera.puzzle.domain.repository.StatsRepository
 import com.tessera.puzzle.presentation.BoardUiState
 import com.tessera.puzzle.presentation.CompleteUiState
-import com.tessera.puzzle.presentation.ContinueInfo
 import com.tessera.puzzle.presentation.HomeUiState
 import com.tessera.puzzle.presentation.PuzzleListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
@@ -45,16 +38,14 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * Orchestrates the pure engine with durable persistence. Exposes StateFlow UI
- * state (UDF). Autosave is debounced (~750 ms, coalescing) with forced saves on
- * lifecycle-critical moments (BR-2).
+ * Orchestrates the pure engine. Exposes StateFlow UI state (UDF). In-progress
+ * boards are intentionally NOT persisted — each entry to a puzzle starts a fresh
+ * game; only completion stats are recorded. Pause is in-session UI only.
  */
-@OptIn(FlowPreview::class)
 @HiltViewModel
 class GameViewModel @Inject constructor(
     private val app: Application,
     private val puzzleRepository: PuzzleRepository,
-    private val boardRepository: BoardRepository,
     private val statsRepository: StatsRepository,
     private val fileStore: PuzzleFileStore,
     @IoDispatcher private val io: CoroutineDispatcher,
@@ -67,9 +58,6 @@ class GameViewModel @Inject constructor(
     private val _restoreNotice = MutableStateFlow(false)
     private val _complete = MutableStateFlow<CompleteUiState?>(null)
 
-    /** Emits board snapshots to be debounced-saved. */
-    private val saveRequests = MutableSharedFlow<BoardState>(extraBufferCapacity = 64)
-
     private var timerJob: Job? = null
 
     val boardUiState: StateFlow<BoardUiState> =
@@ -79,26 +67,15 @@ class GameViewModel @Inject constructor(
 
     val completeUiState: StateFlow<CompleteUiState?> = _complete.asStateFlow()
 
+    // In-progress boards are not persisted: no Continue card, no resume.
     val homeUiState: StateFlow<HomeUiState> =
-        combine(
-            statsRepository.observeHomeStats(),
-            boardRepository.observeMostRecent(),
-            _restoreNotice,
-        ) { stats, recent, notice ->
-            HomeUiState(
-                stats = stats,
-                continueInfo = recent?.let {
-                    ContinueInfo(
-                        puzzleId = it.puzzleId,
-                        puzzleName = puzzleNameCache[it.puzzleId] ?: it.puzzleId,
-                        difficulty = it.difficulty,
-                        placed = it.order.indices.count { i -> it.order[i] == i },
-                        total = it.difficulty.tileCount,
-                    )
-                },
-                restoreNotice = notice,
-            )
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
+        statsRepository.observeHomeStats()
+            .let { flow ->
+                combine(flow, _restoreNotice) { stats, notice ->
+                    HomeUiState(stats = stats, continueInfo = null, restoreNotice = notice)
+                }
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
     private val puzzleNameCache = mutableMapOf<String, String>()
 
@@ -112,11 +89,6 @@ class GameViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { puzzleRepository.ensureSeeded() }
-        // Debounced autosave pipeline (BR-2): coalesce rapid moves.
-        saveRequests
-            .debounce(DEBOUNCE_MS)
-            .onEach { board -> persist(board) }
-            .launchIn(viewModelScope)
     }
 
     /**
@@ -140,6 +112,7 @@ class GameViewModel @Inject constructor(
     fun startBoard(puzzleId: String, difficulty: Difficulty) {
         viewModelScope.launch {
             _error.value = null
+            _complete.value = null // clear any stale completion from a previous puzzle
             val record = puzzleRepository.getPuzzle(puzzleId)
             if (record == null) {
                 _error.value = "This puzzle is no longer available."
@@ -151,23 +124,12 @@ class GameViewModel @Inject constructor(
                 _error.value = "Couldn't load this puzzle's image — the photo may be missing."
                 return@launch
             }
-            val existing = boardRepository.loadBoard(puzzleId, difficulty)
-            val board = if (existing != null) {
-                BoardState(
-                    puzzle = enginePuzzle,
-                    difficulty = difficulty,
-                    order = existing.order,
-                    selected = existing.selected,
-                    moves = existing.moves,
-                    elapsedMillis = existing.elapsedMillis,
-                )
-            } else {
-                BoardState.new(enginePuzzle, difficulty)
-            }
+            // Always start a fresh scramble — in-progress boards are not saved
+            // or resumed. Each entry to a puzzle begins a new game.
+            val board = BoardState.new(enginePuzzle, difficulty)
             _board.value = board
             _tiles.value = emptyList()
             loadTiles(enginePuzzle, difficulty)
-            if (existing == null) persist(board) // forced save so new board is recoverable
             startTimer()
         }
     }
@@ -212,15 +174,13 @@ class GameViewModel @Inject constructor(
         if (next.isSolved) {
             timerJob?.cancel()
             onSolved(next)
-        } else {
-            saveRequests.tryEmit(next) // debounced
         }
     }
 
     /**
      * Swipe [pos] toward [direction], swapping with its edge-adjacent neighbor.
-     * A swipe toward a board edge (no neighbor) is a no-op. Same engine rules
-     * and completion/save handling as [tap].
+     * A swipe toward a board edge (no neighbor) is a no-op. Same engine rules as
+     * [tap]; progress is not persisted.
      */
     fun swipe(pos: Int, direction: Direction) {
         val b = _board.value ?: return
@@ -231,8 +191,6 @@ class GameViewModel @Inject constructor(
         if (next.isSolved) {
             timerJob?.cancel()
             onSolved(next)
-        } else if (next.moves != b.moves) {
-            saveRequests.tryEmit(next) // debounced (only when a swap happened)
         }
     }
 
@@ -243,7 +201,6 @@ class GameViewModel @Inject constructor(
             statsRepository.recordCompletion(
                 board.puzzle.id, board.difficulty, board.elapsedMillis, board.moves,
             )
-            boardRepository.clearBoard(board.puzzle.id, board.difficulty)
             _complete.value = CompleteUiState(
                 puzzleName = board.puzzle.name,
                 difficulty = board.difficulty,
@@ -254,43 +211,17 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    /** Forced immediate save (onStop / Pause). */
-    fun flushSave() {
-        val b = _board.value ?: return
-        if (!b.isSolved) viewModelScope.launch { persist(b) }
-    }
-
-    private suspend fun persist(board: BoardState) {
-        if (board.isSolved) return
-        boardRepository.saveBoard(
-            SavedBoard(
-                puzzleId = board.puzzle.id,
-                difficulty = board.difficulty,
-                order = board.order,
-                selected = board.selected,
-                moves = board.moves,
-                elapsedMillis = board.elapsedMillis,
-                updatedAt = System.currentTimeMillis(),
-            ),
-        )
-    }
+    /** No-op: in-progress boards are not persisted. Kept for lifecycle callers. */
+    fun flushSave() = Unit
 
     fun restart() {
         val current = _board.value ?: return
-        val puzzle = current.puzzle
-        val difficulty = current.difficulty
-        viewModelScope.launch {
-            boardRepository.clearBoard(puzzle.id, difficulty)
-            val fresh = BoardState.new(puzzle, difficulty)
-            _board.value = fresh
-            persist(fresh)
-            startTimer()
-        }
+        _board.value = BoardState.new(current.puzzle, current.difficulty)
+        startTimer()
     }
 
     fun exitBoard() {
         timerJob?.cancel()
-        flushSave()
         _board.value = null
         _tiles.value = emptyList()
         _error.value = null
@@ -307,9 +238,5 @@ class GameViewModel @Inject constructor(
     /** Delete a custom puzzle (row + files); bundled puzzles are rejected in the repo. */
     fun deleteCustomPuzzle(puzzleId: String) {
         viewModelScope.launch { puzzleRepository.deletePuzzle(puzzleId) }
-    }
-
-    private companion object {
-        const val DEBOUNCE_MS = 750L
     }
 }
