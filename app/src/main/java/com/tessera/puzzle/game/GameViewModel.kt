@@ -5,10 +5,12 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.tessera.puzzle.data.ImageSlicer
+import com.tessera.puzzle.data.files.PuzzleFileStore
 import com.tessera.puzzle.di.DefaultDispatcher
 import com.tessera.puzzle.di.IoDispatcher
 import com.tessera.puzzle.domain.model.BoardState
 import com.tessera.puzzle.domain.model.Difficulty
+import com.tessera.puzzle.domain.model.Direction
 import com.tessera.puzzle.domain.model.Puzzle
 import com.tessera.puzzle.domain.model.persistence.ImageRef
 import com.tessera.puzzle.domain.model.persistence.PuzzleRecord
@@ -54,12 +56,14 @@ class GameViewModel @Inject constructor(
     private val puzzleRepository: PuzzleRepository,
     private val boardRepository: BoardRepository,
     private val statsRepository: StatsRepository,
+    private val fileStore: PuzzleFileStore,
     @IoDispatcher private val io: CoroutineDispatcher,
     @DefaultDispatcher private val default: CoroutineDispatcher,
 ) : AndroidViewModel(app) {
 
     private val _board = MutableStateFlow<BoardState?>(null)
     private val _tiles = MutableStateFlow<List<ImageBitmap>>(emptyList())
+    private val _error = MutableStateFlow<String?>(null)
     private val _restoreNotice = MutableStateFlow(false)
     private val _complete = MutableStateFlow<CompleteUiState?>(null)
 
@@ -69,8 +73,9 @@ class GameViewModel @Inject constructor(
     private var timerJob: Job? = null
 
     val boardUiState: StateFlow<BoardUiState> =
-        combine(_board, _tiles) { board, tiles -> BoardUiState(board, tiles) }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), BoardUiState())
+        combine(_board, _tiles, _error) { board, tiles, error ->
+            BoardUiState(board, tiles, error)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), BoardUiState())
 
     val completeUiState: StateFlow<CompleteUiState?> = _complete.asStateFlow()
 
@@ -114,22 +119,38 @@ class GameViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    /** Resolve a PuzzleRecord to a playable engine Puzzle (drawable-backed only in P1). */
+    /**
+     * Resolve a PuzzleRecord to a playable engine Puzzle. Drawable-backed
+     * (bundled) and file-backed (custom photos) are both supported. Returns null
+     * if the image is unavailable (missing drawable / missing custom file), so
+     * the caller can surface a recoverable error rather than a blank board.
+     */
     private suspend fun toEnginePuzzle(record: PuzzleRecord): Puzzle? = withContext(io) {
         when (val ref = record.imageRef) {
             is ImageRef.DrawableRef -> {
                 val resId = app.resources.getIdentifier(ref.resName, "drawable", app.packageName)
-                if (resId == 0) null else Puzzle(record.id, record.name, resId)
+                if (resId == 0) null else Puzzle(record.id, record.name, imageRes = resId)
             }
-            is ImageRef.FileRef -> null // Phase 2
+            is ImageRef.FileRef ->
+                if (!fileStore.filesExist(ref)) null
+                else Puzzle(record.id, record.name, imagePath = ref.imagePath)
         }
     }
 
     fun startBoard(puzzleId: String, difficulty: Difficulty) {
         viewModelScope.launch {
-            val record = puzzleRepository.getPuzzle(puzzleId) ?: return@launch
+            _error.value = null
+            val record = puzzleRepository.getPuzzle(puzzleId)
+            if (record == null) {
+                _error.value = "This puzzle is no longer available."
+                return@launch
+            }
             puzzleNameCache[record.id] = record.name
-            val enginePuzzle = toEnginePuzzle(record) ?: return@launch
+            val enginePuzzle = toEnginePuzzle(record)
+            if (enginePuzzle == null) {
+                _error.value = "Couldn't load this puzzle's image — the photo may be missing."
+                return@launch
+            }
             val existing = boardRepository.loadBoard(puzzleId, difficulty)
             val board = if (existing != null) {
                 BoardState(
@@ -154,9 +175,19 @@ class GameViewModel @Inject constructor(
     private fun loadTiles(puzzle: Puzzle, difficulty: Difficulty) {
         viewModelScope.launch {
             val sliced = withContext(default) {
-                ImageSlicer.slice(app, puzzle.imageRes, difficulty.gridSize)
+                val path = puzzle.imagePath
+                if (path != null) {
+                    ImageSlicer.slice(path, difficulty.gridSize)
+                } else {
+                    ImageSlicer.slice(app, puzzle.imageRes, difficulty.gridSize)
+                }
             }
-            _tiles.value = sliced
+            if (sliced.isEmpty()) {
+                _error.value = "Couldn't load this puzzle's image — try another photo."
+                _board.value = null
+            } else {
+                _tiles.value = sliced
+            }
         }
     }
 
@@ -185,6 +216,27 @@ class GameViewModel @Inject constructor(
             saveRequests.tryEmit(next) // debounced
         }
     }
+
+    /**
+     * Swipe [pos] toward [direction], swapping with its edge-adjacent neighbor.
+     * A swipe toward a board edge (no neighbor) is a no-op. Same engine rules
+     * and completion/save handling as [tap].
+     */
+    fun swipe(pos: Int, direction: Direction) {
+        val b = _board.value ?: return
+        if (b.isSolved) return
+        val next = b.swipe(pos, direction)
+        if (next === b) return
+        _board.value = next
+        if (next.isSolved) {
+            timerJob?.cancel()
+            onSolved(next)
+        } else if (next.moves != b.moves) {
+            saveRequests.tryEmit(next) // debounced (only when a swap happened)
+        }
+    }
+
+    fun consumeBoardError() { _error.value = null }
 
     private fun onSolved(board: BoardState) {
         viewModelScope.launch {
@@ -241,6 +293,7 @@ class GameViewModel @Inject constructor(
         flushSave()
         _board.value = null
         _tiles.value = emptyList()
+        _error.value = null
     }
 
     fun consumeRestoreNotice() {

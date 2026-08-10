@@ -37,6 +37,7 @@ data class HomeUiState(
 data class BoardUiState(
     val board: BoardState? = null,
     val tiles: List<ImageBitmap> = emptyList(),
+    val error: String? = null,
 )
 
 data class CompleteUiState(
