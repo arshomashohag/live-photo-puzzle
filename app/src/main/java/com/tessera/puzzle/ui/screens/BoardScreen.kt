@@ -175,8 +175,13 @@ fun BoardScreen(
                 tiles = tiles,
                 difficulty = difficulty,
             )
-            // Hint overlay: the full image drawn directly over the board, so it
-            // lines up exactly with the tiles beneath it. Timed/faded in the
+            // Hint overlay: the full image drawn directly over the board. It
+            // MUST use the exact same sizing chain as the LazyVerticalGrid in
+            // PuzzleBoard (fillMaxWidth → widthIn(560) → aspectRatio(1) →
+            // border) so both resolve to the identical width-driven square and
+            // the overlay lands pixel-aligned on the tiles. Using fillMaxSize
+            // here instead would resolve a different (height-driven) square and
+            // make the image jump relative to the tiles. Timed/faded in the
             // Hint button's coroutine; the board state underneath is untouched.
             if (hintVisible && fullImage != null) {
                 Image(
@@ -184,7 +189,8 @@ fun BoardScreen(
                     contentDescription = "Hint: full image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
+                        .widthIn(max = 560.dp)
                         .aspectRatio(1f)
                         .graphicsLayer { alpha = hintAlpha.value }
                         .border(1.dp, TesseraColors.Ink),
