@@ -11,6 +11,7 @@ import com.tessera.puzzle.di.IoDispatcher
 import com.tessera.puzzle.domain.model.BoardState
 import com.tessera.puzzle.domain.model.Difficulty
 import com.tessera.puzzle.domain.model.Direction
+import com.tessera.puzzle.domain.model.HintState
 import com.tessera.puzzle.domain.model.Puzzle
 import com.tessera.puzzle.domain.model.persistence.ImageRef
 import com.tessera.puzzle.domain.model.persistence.PuzzleRecord
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
@@ -59,6 +61,8 @@ class GameViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     private val _restoreNotice = MutableStateFlow(false)
     private val _complete = MutableStateFlow<CompleteUiState?>(null)
+    private val _hints = MutableStateFlow(HintState.fresh())
+    private val _fullImage = MutableStateFlow<ImageBitmap?>(null)
 
     private var timerJob: Job? = null
 
@@ -68,6 +72,12 @@ class GameViewModel @Inject constructor(
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), BoardUiState())
 
     val completeUiState: StateFlow<CompleteUiState?> = _complete.asStateFlow()
+
+    val hintsRemaining: StateFlow<Int> =
+        _hints.map { it.remaining }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HintState.MAX)
+
+    val fullImage: StateFlow<ImageBitmap?> = _fullImage.asStateFlow()
 
     // In-progress boards are not persisted: no Continue card, no resume.
     val homeUiState: StateFlow<HomeUiState> =
@@ -120,6 +130,8 @@ class GameViewModel @Inject constructor(
         _tiles.value = emptyList()
         _complete.value = null
         _error.value = null
+        _hints.value = HintState.fresh()
+        _fullImage.value = null
         viewModelScope.launch {
             val record = puzzleRepository.getPuzzle(puzzleId)
             if (record == null) {
@@ -144,19 +156,26 @@ class GameViewModel @Inject constructor(
 
     private fun loadTiles(puzzle: Puzzle, difficulty: Difficulty) {
         viewModelScope.launch {
-            val sliced = withContext(default) {
+            val (sliced, full) = withContext(default) {
                 val path = puzzle.imagePath
-                if (path != null) {
+                val tiles = if (path != null) {
                     ImageSlicer.slice(path, difficulty.gridSize)
                 } else {
                     ImageSlicer.slice(app, puzzle.imageRes, difficulty.gridSize)
                 }
+                val fullImg = if (path != null) {
+                    ImageSlicer.loadFull(path)
+                } else {
+                    ImageSlicer.loadFull(app, puzzle.imageRes)
+                }
+                tiles to fullImg
             }
             if (sliced.isEmpty()) {
                 _error.value = "Couldn't load this puzzle's image — try another photo."
                 _board.value = null
             } else {
                 _tiles.value = sliced
+                _fullImage.value = full
             }
         }
     }
@@ -231,6 +250,7 @@ class GameViewModel @Inject constructor(
     fun restart() {
         val current = _board.value ?: return
         _board.value = BoardState.new(current.puzzle, current.difficulty)
+        _hints.value = HintState.fresh()
         startTimer()
     }
 
@@ -238,7 +258,13 @@ class GameViewModel @Inject constructor(
         timerJob?.cancel()
         _board.value = null
         _tiles.value = emptyList()
+        _fullImage.value = null
         _error.value = null
+    }
+
+    /** Consume one hint if any remain (no-op at 0). */
+    fun useHint() {
+        _hints.value = _hints.value.use()
     }
 
     fun consumeRestoreNotice() {
