@@ -81,8 +81,8 @@ fun SettingsDrawerContent() {
         }
 
         Text("FEEDBACK", style = TesseraType.label.copy(color = TesseraColors.Faint))
-        DrawerToggle("Sound", settings.soundEnabled, "Coming soon") { vm.setSound(it) }
-        DrawerToggle("Haptics", settings.hapticsEnabled, "Coming soon") { vm.setHaptics(it) }
+        DrawerToggle("Sound", settings.soundEnabled, "Tile & completion sounds") { vm.setSound(it) }
+        DrawerToggle("Haptics", settings.hapticsEnabled, "Vibrate on moves") { vm.setHaptics(it) }
 
         Text("DATA", style = TesseraType.label.copy(color = TesseraColors.Faint))
         Box(
