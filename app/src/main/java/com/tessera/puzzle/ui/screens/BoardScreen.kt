@@ -83,12 +83,26 @@ fun BoardScreen(
     LaunchedEffect(puzzleId, difficulty) {
         val b = game.boardUiState.value.board
         if (b == null || b.puzzle.id != puzzleId || b.difficulty != difficulty || b.isSolved) {
+            // Always start fresh here. If the previous board was already solved,
+            // starting fresh reshuffles the SAME photo so it can be replayed —
+            // and prevents the stale solved board from flashing the Complete
+            // screen before the new scramble loads.
             game.startBoard(puzzleId, difficulty)
         }
     }
 
-    LaunchedEffect(board?.isSolved) {
-        if (board != null && board.isSolved) onSolved()
+    // Navigate to Complete only after a solve that happens during THIS session:
+    // require that the board went from unsolved → solved while mounted. A board
+    // that is already solved on entry is ignored (startBoard reshuffles it).
+    var wasUnsolved by remember(puzzleId, difficulty) { mutableStateOf(false) }
+    LaunchedEffect(board?.isSolved, board?.puzzle?.id, board?.difficulty) {
+        val b = board ?: return@LaunchedEffect
+        if (b.puzzle.id != puzzleId || b.difficulty != difficulty) return@LaunchedEffect
+        if (!b.isSolved) {
+            wasUnsolved = true
+        } else if (wasUnsolved) {
+            onSolved()
+        }
     }
 
     // Forced save on lifecycle stop (BR-2).
