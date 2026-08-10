@@ -131,11 +131,12 @@ fun GridPreview(gridSize: Int, modifier: Modifier = Modifier, accent: Color = Te
             .clip(TesseraShapes.tile)
             .background(accent)
             .drawBehind {
-                val step = size.width / gridSize
+                val stepX = size.width / gridSize
+                val stepY = size.height / gridSize
                 val line = 2.dp.toPx()
                 for (i in 1 until gridSize) {
-                    drawRect(lineColor, topLeft = Offset(i * step, 0f), size = Size(line, size.height))
-                    drawRect(lineColor, topLeft = Offset(0f, i * step), size = Size(size.width, line))
+                    drawRect(lineColor, topLeft = Offset(i * stepX, 0f), size = Size(line, size.height))
+                    drawRect(lineColor, topLeft = Offset(0f, i * stepY), size = Size(size.width, line))
                 }
             },
     )

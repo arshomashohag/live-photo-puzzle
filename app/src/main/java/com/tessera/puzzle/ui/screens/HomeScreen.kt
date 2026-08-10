@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -120,23 +122,28 @@ fun HomeScreen(
         )
 
         Text("CHOOSE A DIFFICULTY", style = TesseraType.label.copy(color = TesseraColors.Faint))
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(
+            Modifier.height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
             Difficulty.entries.forEach { d ->
                 val accent = accentColor(LevelPalette.accentFor(d))
                 RegistrationFrame(
-                    Modifier.weight(1f).heightIn(min = 150.dp).clickable { onPickDifficulty(d) },
+                    Modifier.weight(1f).fillMaxHeight().clickable { onPickDifficulty(d) },
                 ) {
-                    Column {
+                    Column(Modifier.fillMaxHeight()) {
                         GridPreview(d.gridSize, Modifier.fillMaxWidth().height(64.dp), accent = accent)
                         Column(
-                            Modifier.padding(9.dp),
+                            Modifier.fillMaxWidth().weight(1f).padding(9.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
-                            Text(d.label.uppercase(), style = TesseraType.cardTitle)
+                            Text(d.label.uppercase(), style = TesseraType.cardTitle, maxLines = 1)
                             Text(
-                                "${d.gridSize} × ${d.gridSize} · ${d.tileCount} tiles",
+                                "${d.gridSize}×${d.gridSize} · ${d.tileCount} tiles",
                                 style = TesseraType.body.copy(color = TesseraColors.Muted),
+                                maxLines = 1,
                             )
+                            Spacer(Modifier.weight(1f))
                             DifficultyMeter(d.level, accent = accent)
                         }
                     }
