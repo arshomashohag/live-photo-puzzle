@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
@@ -68,7 +69,8 @@ fun BlueprintButton(
     modifier: Modifier = Modifier,
     filled: Boolean = true,
     foreground: Color = TesseraColors.Ink,
-) = PillButton(text, onClick, modifier, filled, foreground)
+    enabled: Boolean = true,
+) = PillButton(text, onClick, modifier, filled, foreground, enabled)
 
 @Composable
 fun PillButton(
@@ -77,15 +79,17 @@ fun PillButton(
     modifier: Modifier = Modifier,
     filled: Boolean = true,
     foreground: Color = TesseraColors.Ink,
+    enabled: Boolean = true,
 ) {
     val bg = if (filled) TesseraColors.Primary else TesseraColors.SurfaceAlt
     val fg = if (filled) TesseraColors.OnPrimary else foreground
     Row(
         modifier = modifier
-            .then(if (filled) Modifier.primaryGlow(TesseraShapes.pill) else Modifier)
+            .then(if (filled && enabled) Modifier.primaryGlow(TesseraShapes.pill) else Modifier)
             .clip(TesseraShapes.pill)
             .background(bg)
-            .clickableNoRipple(onClick)
+            .then(if (enabled) Modifier.clickableNoRipple(onClick) else Modifier)
+            .graphicsLayer { alpha = if (enabled) 1f else 0.4f }
             .heightIn(min = 48.dp)
             .padding(horizontal = 22.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.Center,

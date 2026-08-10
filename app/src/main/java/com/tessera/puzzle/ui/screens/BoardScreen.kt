@@ -80,6 +80,13 @@ fun BoardScreen(
     val error = state.error
     var paused by remember { mutableStateOf(false) }
 
+    val hintsRemaining by game.hintsRemaining.collectAsStateWithLifecycle()
+    val fullImage by game.fullImage.collectAsStateWithLifecycle()
+    val reducedMotion = rememberReducedMotion()
+    var hintVisible by remember { mutableStateOf(false) }
+    val hintAlpha = remember { Animatable(0f) }
+    val scope = rememberCoroutineScope()
+
     LaunchedEffect(puzzleId, difficulty) {
         val b = game.boardUiState.value.board
         if (b == null || b.puzzle.id != puzzleId || b.difficulty != difficulty || b.isSolved) {
@@ -101,6 +108,7 @@ fun BoardScreen(
         if (!b.isSolved) {
             wasUnsolved = true
         } else if (wasUnsolved) {
+            kotlinx.coroutines.delay(REVEAL_HOLD_MS.toLong())
             onSolved()
         }
     }
@@ -157,19 +165,67 @@ fun BoardScreen(
             }
         }
 
-        PuzzleBoard(
-            game = game,
-            board = board,
-            tiles = tiles,
-            difficulty = difficulty,
-        )
+        Box(
+            Modifier.fillMaxWidth().widthIn(max = 560.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            PuzzleBoard(
+                game = game,
+                board = board,
+                tiles = tiles,
+                difficulty = difficulty,
+            )
+            // Hint overlay: the full image drawn directly over the board, so it
+            // lines up exactly with the tiles beneath it. Timed/faded in the
+            // Hint button's coroutine; the board state underneath is untouched.
+            if (hintVisible && fullImage != null) {
+                Image(
+                    bitmap = fullImage!!,
+                    contentDescription = "Hint: full image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .aspectRatio(1f)
+                        .graphicsLayer { alpha = hintAlpha.value }
+                        .border(1.dp, TesseraColors.Ink),
+                )
+            }
+        }
 
-        PillButton(
-            text = "Pause",
-            onClick = { paused = true },
-            modifier = Modifier.fillMaxWidth().widthIn(max = 560.dp),
-            filled = false,
-        )
+        Row(
+            Modifier.fillMaxWidth().widthIn(max = 560.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            PillButton(
+                text = "Hint ($hintsRemaining)",
+                onClick = {
+                    if (hintVisible) return@PillButton
+                    game.useHint()
+                    hintVisible = true
+                    scope.launch {
+                        if (reducedMotion) {
+                            hintAlpha.snapTo(1f)
+                            kotlinx.coroutines.delay(HINT_MS.toLong())
+                            hintAlpha.snapTo(0f)
+                        } else {
+                            hintAlpha.animateTo(1f, tween(HINT_FADE_MS))
+                            kotlinx.coroutines.delay(HINT_MS.toLong())
+                            hintAlpha.animateTo(0f, tween(HINT_FADE_MS))
+                        }
+                        hintVisible = false
+                    }
+                },
+                modifier = Modifier.weight(1f),
+                filled = false,
+                enabled = hintsRemaining > 0 && !hintVisible,
+            )
+            PillButton(
+                text = "Pause",
+                onClick = { paused = true },
+                modifier = Modifier.weight(1f),
+                filled = false,
+            )
+        }
     }
 
     if (paused) {
@@ -255,6 +311,7 @@ private fun PuzzleBoard(
                         // matching tiles. Only draw a border to highlight the
                         // selected / swappable tiles during play.
                         when {
+                            board.isSolved -> Modifier
                             selected -> Modifier.border(3.dp, TesseraColors.Primary)
                             canSwap -> Modifier.border(2.dp, TesseraColors.PrimaryLight)
                             else -> Modifier
@@ -376,4 +433,7 @@ private fun BoardErrorOverlay(message: String, onExit: () -> Unit) {
 
 private const val SWAP_MS = 200
 private const val SWIPE_THRESHOLD_DP = 24
+private const val REVEAL_HOLD_MS = 2000
+private const val HINT_MS = 2500
+private const val HINT_FADE_MS = 200
 private val SCRIM = androidx.compose.ui.graphics.Color(0xB3000000)
