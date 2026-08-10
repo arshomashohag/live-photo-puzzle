@@ -40,6 +40,22 @@ class BoardState(
         }
     }
 
+    /**
+     * Swipe handling: swap [pos] with its edge-adjacent neighbor in [direction].
+     * A swipe toward a board edge (no neighbor) is a no-op — nothing selected,
+     * no move counted. Resolves to the same swap two adjacent taps would make,
+     * so engine rules (adjacency, move counting, solvability) are preserved.
+     */
+    fun swipe(pos: Int, direction: Direction): BoardState {
+        val target = Grid.neighborInDirection(pos, direction, difficulty.gridSize)
+            ?: return if (selected == null) this else copy(selected = null)
+        val next = order.copyOf()
+        val tmp = next[pos]
+        next[pos] = next[target]
+        next[target] = tmp
+        return copy(order = next, selected = null, moves = moves + 1)
+    }
+
     fun withElapsed(ms: Long): BoardState = copy(elapsedMillis = ms)
 
     private fun copy(

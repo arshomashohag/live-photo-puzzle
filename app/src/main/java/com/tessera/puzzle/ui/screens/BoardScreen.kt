@@ -1,10 +1,14 @@
 package com.tessera.puzzle.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,9 +31,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
@@ -39,16 +47,24 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tessera.puzzle.domain.model.Difficulty
+import com.tessera.puzzle.domain.model.Direction
 import com.tessera.puzzle.domain.model.Grid
 import com.tessera.puzzle.game.GameViewModel
-import com.tessera.puzzle.ui.theme.BlueprintButton
+import com.tessera.puzzle.ui.theme.PillButton
+import com.tessera.puzzle.ui.theme.RoundedCard
 import com.tessera.puzzle.ui.theme.TesseraColors
 import com.tessera.puzzle.ui.theme.TesseraType
+import com.tessera.puzzle.ui.theme.rememberReducedMotion
+import kotlin.math.abs
+import kotlinx.coroutines.launch
 
 private fun formatTime(ms: Long): String {
     val totalSec = ms / 1000
     return "%02d:%02d".format(totalSec / 60, totalSec % 60)
 }
+
+/** A tile pair mid-animation: each slides from its previous cell into place. */
+private data class TileAnim(val posA: Int, val posB: Int)
 
 @Composable
 fun BoardScreen(
@@ -61,6 +77,7 @@ fun BoardScreen(
     val state by game.boardUiState.collectAsStateWithLifecycle()
     val board = state.board
     val tiles = state.tiles
+    val error = state.error
     var paused by remember { mutableStateOf(false) }
 
     LaunchedEffect(puzzleId, difficulty) {
@@ -85,6 +102,11 @@ fun BoardScreen(
     }
 
     BackHandler(enabled = !paused) { paused = true }
+
+    if (error != null) {
+        BoardErrorOverlay(error, onExit = { game.consumeBoardError(); onExit() })
+        return
+    }
 
     if (board == null) {
         Box(Modifier.fillMaxSize().background(TesseraColors.Haze))
@@ -112,65 +134,23 @@ fun BoardScreen(
                 )
                 Text(
                     "${board.placedCount}/${difficulty.tileCount} PLACED",
-                    style = TesseraType.label.copy(color = TesseraColors.Faint),
+                    style = TesseraType.label.copy(color = TesseraColors.Muted),
                 )
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(formatTime(board.elapsedMillis), style = TesseraType.mono.copy(color = TesseraColors.Ink))
-                Text("${board.moves} MOVES", style = TesseraType.label.copy(color = TesseraColors.Faint))
+                Text("${board.moves} MOVES", style = TesseraType.label.copy(color = TesseraColors.Muted))
             }
         }
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(difficulty.gridSize),
-            modifier = Modifier.fillMaxWidth().widthIn(max = 560.dp).aspectRatio(1f).border(1.dp, TesseraColors.Ink),
-            userScrollEnabled = false,
-        ) {
-            val sel = board.selected
-            val swappable = if (sel != null) {
-                Grid.neighbors(sel, difficulty.gridSize).toSet()
-            } else {
-                emptySet()
-            }
-            items(count = board.order.size) { position ->
-                val sourceIndex = board.order[position]
-                val selected = board.selected == position
-                val canSwap = position in swappable
-                val placed = sourceIndex == position
-                Box(
-                    Modifier
-                        .aspectRatio(1f)
-                        .clickable { game.tap(position) }
-                        .then(
-                            when {
-                                selected -> Modifier.border(3.dp, TesseraColors.Steel)
-                                canSwap -> Modifier.border(2.dp, TesseraColors.Sky)
-                                else -> Modifier.border(0.5.dp, TesseraColors.Hairline)
-                            },
-                        )
-                        .semantics {
-                            contentDescription = "Tile ${position + 1}" +
-                                (if (selected) ", selected" else "") +
-                                (if (canSwap) ", swappable" else "") +
-                                (if (placed) ", in place" else "")
-                        },
-                ) {
-                    val tile = tiles.getOrNull(sourceIndex)
-                    if (tile != null) {
-                        Image(
-                            bitmap = tile,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize(),
-                        )
-                    } else {
-                        Box(Modifier.fillMaxSize().background(TesseraColors.Sky))
-                    }
-                }
-            }
-        }
+        PuzzleBoard(
+            game = game,
+            board = board,
+            tiles = tiles,
+            difficulty = difficulty,
+        )
 
-        BlueprintButton(
+        PillButton(
             text = "Pause",
             onClick = { paused = true },
             modifier = Modifier.fillMaxWidth().widthIn(max = 560.dp),
@@ -188,22 +168,194 @@ fun BoardScreen(
 }
 
 @Composable
+private fun PuzzleBoard(
+    game: GameViewModel,
+    board: com.tessera.puzzle.domain.model.BoardState,
+    tiles: List<androidx.compose.ui.graphics.ImageBitmap>,
+    difficulty: Difficulty,
+) {
+    val gridSize = difficulty.gridSize
+    val scope = rememberCoroutineScope()
+    val reducedMotion = rememberReducedMotion()
+
+    // Slide progress 1→0 for the two most-recently-swapped tiles.
+    val slide = remember { Animatable(0f) }
+    var anim by remember { mutableStateOf<TileAnim?>(null) }
+    var animating by remember { mutableStateOf(false) }
+
+    fun runSwipe(pos: Int, dir: Direction) {
+        if (animating) return
+        val target = Grid.neighborInDirection(pos, dir, gridSize) ?: return
+        animating = true
+        anim = TileAnim(pos, target)
+        game.swipe(pos, dir)
+        scope.launch {
+            if (reducedMotion) {
+                slide.snapTo(0f)
+            } else {
+                slide.snapTo(1f)
+                slide.animateTo(0f, tween(SWAP_MS, easing = FastOutSlowInEasing))
+            }
+            anim = null
+            animating = false
+        }
+    }
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(gridSize),
+        modifier = Modifier
+            .fillMaxWidth()
+            .widthIn(max = 560.dp)
+            .aspectRatio(1f)
+            .border(1.dp, TesseraColors.Ink)
+            .pointerInput(gridSize, board.order.size) {
+                detectTileSwipes(gridSize) { pos, dir -> runSwipe(pos, dir) }
+            },
+        userScrollEnabled = false,
+    ) {
+        val sel = board.selected
+        val swappable = if (sel != null) Grid.neighbors(sel, gridSize).toSet() else emptySet()
+        items(count = board.order.size) { position ->
+            val sourceIndex = board.order[position]
+            val selected = board.selected == position
+            val canSwap = position in swappable
+            val placed = sourceIndex == position
+
+            // Slide offset: an animating tile enters from the cell it swapped with.
+            val a = anim
+            val slideFrac = if (a != null && (position == a.posA || position == a.posB)) {
+                val from = if (position == a.posA) a.posB else a.posA
+                val dCol = ((from % gridSize) - (position % gridSize)).toFloat()
+                val dRow = ((from / gridSize) - (position / gridSize)).toFloat()
+                Pair(dCol, dRow)
+            } else {
+                null
+            }
+
+            Box(
+                Modifier
+                    .aspectRatio(1f)
+                    .then(
+                        when {
+                            selected -> Modifier.border(3.dp, TesseraColors.Primary)
+                            canSwap -> Modifier.border(2.dp, TesseraColors.PrimaryLight)
+                            else -> Modifier.border(0.5.dp, TesseraColors.Hairline)
+                        },
+                    )
+                    .semantics {
+                        contentDescription = "Tile ${position + 1}" +
+                            (if (selected) ", selected" else "") +
+                            (if (canSwap) ", swappable" else "") +
+                            (if (placed) ", in place" else "")
+                    },
+            ) {
+                val tile = tiles.getOrNull(sourceIndex)
+                val tileMod = if (slideFrac != null) {
+                    Modifier.graphicsLayer {
+                        translationX = slideFrac.first * size.width * slide.value
+                        translationY = slideFrac.second * size.height * slide.value
+                    }
+                } else {
+                    Modifier
+                }
+                if (tile != null) {
+                    Image(
+                        bitmap = tile,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().then(tileMod),
+                    )
+                } else {
+                    Box(Modifier.fillMaxSize().background(TesseraColors.PrimaryLight))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Detects a directional flick/drag on the board and reports the (tile position,
+ * direction). Registers on release when total travel exceeds [SWIPE_THRESHOLD_DP]
+ * along the dominant axis — one move per gesture; small jitters are ignored so
+ * accidental taps don't move tiles.
+ */
+private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.detectTileSwipes(
+    gridSize: Int,
+    onSwipe: (pos: Int, dir: Direction) -> Unit,
+) {
+    val thresholdPx = SWIPE_THRESHOLD_DP.dp.toPx()
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false)
+        val cell = size.width.toFloat() / gridSize
+        val col = (down.position.x / cell).toInt().coerceIn(0, gridSize - 1)
+        val row = (down.position.y / cell).toInt().coerceIn(0, gridSize - 1)
+        val pos = row * gridSize + col
+        var dx = 0f
+        var dy = 0f
+        while (true) {
+            val event = awaitPointerEvent()
+            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+            dx += change.positionChange().x
+            dy += change.positionChange().y
+            if (!change.pressed) break
+        }
+        if (abs(dx) < thresholdPx && abs(dy) < thresholdPx) return@awaitEachGesture
+        val dir = if (abs(dx) >= abs(dy)) {
+            if (dx > 0) Direction.RIGHT else Direction.LEFT
+        } else {
+            if (dy > 0) Direction.DOWN else Direction.UP
+        }
+        onSwipe(pos, dir)
+    }
+}
+
+@Composable
 private fun PauseOverlay(onResume: () -> Unit, onRestart: () -> Unit, onExit: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
-            .background(TesseraColors.SplashBg.copy(alpha = 0.92f))
+            .background(SCRIM)
             .windowInsetsPadding(WindowInsets.safeDrawing),
         contentAlignment = Alignment.Center,
     ) {
-        Column(
-            Modifier.padding(32.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            Text("PAUSED", style = TesseraType.display.copy(color = TesseraColors.Paper))
-            BlueprintButton("Resume", onResume, Modifier.fillMaxWidth())
-            BlueprintButton("Restart", onRestart, Modifier.fillMaxWidth(), filled = false, foreground = TesseraColors.Paper)
-            BlueprintButton("Exit puzzle", onExit, Modifier.fillMaxWidth(), filled = false, foreground = TesseraColors.Paper)
+        RoundedCard(Modifier.padding(32.dp).widthIn(max = 360.dp)) {
+            Column(
+                Modifier.fillMaxWidth().padding(28.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text("PAUSED", style = TesseraType.display.copy(color = TesseraColors.Ink))
+                PillButton("Resume", onResume, Modifier.fillMaxWidth())
+                PillButton("Restart", onRestart, Modifier.fillMaxWidth(), filled = false)
+                PillButton("Exit puzzle", onExit, Modifier.fillMaxWidth(), filled = false)
+            }
         }
     }
 }
+
+@Composable
+private fun BoardErrorOverlay(message: String, onExit: () -> Unit) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(TesseraColors.Haze)
+            .windowInsetsPadding(WindowInsets.safeDrawing),
+        contentAlignment = Alignment.Center,
+    ) {
+        RoundedCard(Modifier.padding(32.dp).widthIn(max = 360.dp)) {
+            Column(
+                Modifier.fillMaxWidth().padding(28.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text("Can't start puzzle", style = TesseraType.heading.copy(color = TesseraColors.Ink))
+                Text(message, style = TesseraType.body.copy(color = TesseraColors.Muted))
+                PillButton("Go back", onExit, Modifier.fillMaxWidth())
+            }
+        }
+    }
+}
+
+private const val SWAP_MS = 200
+private const val SWIPE_THRESHOLD_DP = 24
+private val SCRIM = androidx.compose.ui.graphics.Color(0xB3000000)

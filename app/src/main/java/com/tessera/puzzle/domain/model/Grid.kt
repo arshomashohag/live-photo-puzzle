@@ -32,4 +32,23 @@ object Grid {
         if (col < gridSize - 1) result.add(pos + 1)
         return result
     }
+
+    /**
+     * The neighbor of [pos] in [direction] on a [gridSize]×[gridSize] board, or
+     * null when [pos] is on that edge (no neighbor there). Used by swipe-to-swap:
+     * a swipe toward a board edge is a no-op.
+     */
+    fun neighborInDirection(pos: Int, direction: Direction, gridSize: Int): Int? {
+        val row = pos / gridSize
+        val col = pos % gridSize
+        return when (direction) {
+            Direction.UP -> if (row > 0) pos - gridSize else null
+            Direction.DOWN -> if (row < gridSize - 1) pos + gridSize else null
+            Direction.LEFT -> if (col > 0) pos - 1 else null
+            Direction.RIGHT -> if (col < gridSize - 1) pos + 1 else null
+        }
+    }
 }
+
+/** Swipe direction on the board. */
+enum class Direction { UP, DOWN, LEFT, RIGHT }
