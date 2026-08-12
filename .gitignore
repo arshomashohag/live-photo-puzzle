@@ -13,5 +13,9 @@ app/build/
 *.aab
 *.keystore
 
+# Release signing material — NEVER commit
+*.jks
+keystore.properties
+
 # Kotlin
 .kotlin/
