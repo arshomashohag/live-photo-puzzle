@@ -21,6 +21,7 @@ material3Adaptive = "1.0.0"
 androidxTestJunit = "1.2.1"
 androidxTestCore = "1.6.1"
 androidxTestRunner = "1.6.2"
+dependencyCheck = "10.0.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -81,3 +82,4 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+owasp-dependencycheck = { id = "org.owasp.dependencycheck", version.ref = "dependencyCheck" }
