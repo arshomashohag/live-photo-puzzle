@@ -19,3 +19,6 @@ keystore.properties
 
 # Kotlin
 .kotlin/
+
+# AI-DLC rule details (local workflow tooling, not app source)
+.aidlc-rule-details/
