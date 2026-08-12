@@ -1,120 +1,38 @@
-# Requirements Clarification Questions — Tessera Production Build
+# Phase 5 (Release & Hardening) — Requirement Verification Questions
 
-Please answer each question by filling in the letter choice after the `[Answer]:`
-tag. If none of the options match, choose the "Other" option and describe your
-preference after the tag. Let me know when you're done.
+Status: ANSWERED (via session AskUserQuestion + clarification). Recorded here
+for the audit trail.
 
-**Context already locked in earlier discussion (not re-asked):**
-- Mechanic: **sliding-swap** (tap two tiles → they slide/animate and exchange;
-  all arrangements solvable).
-- Custom-photo image storage: **app-internal files (`filesDir`) + Room metadata**.
-- DI: **Hilt**. State: **StateFlow**. Camera: **CameraX**. Photo picker:
-  **PickVisualMedia**. Prefs: **DataStore**.
-- Offline-first, no `INTERNET` permission, only CAMERA permission.
+## Q1. Release target / output
+A) Play Store AAB (signed)  ← **[Answer]: A**
+B) Signed release APK
+C) Hardening only, no signing
 
----
+## Q2. Keystore
+A) Create a new keystore  ← **[Answer]: A**
+B) I have one already
+C) Skip signing for now
 
-## Question 1: Security Extensions
-Should security extension rules be enforced for this project?
+## Q3. R8 minification + resource shrinking
+A) Standard R8 + resource shrink
+B) Full R8 (obfuscation on)
+C) No minification yet
+**[Answer]: Conditional — "if it's a requirement from Google then Standard R8,
+else don't minify yet." Resolved to C (No minification yet): Google Play does
+NOT require R8/minify/shrink for AAB uploads. Play requires AAB + targetSdk 35 +
+signing + 64-bit, all otherwise satisfied. Lower-risk first release.**
 
-A) Yes — enforce all SECURITY rules as blocking constraints (recommended for production-grade applications)
+## Q4. Dependency vulnerability scan (SECURITY-10)
+A) OWASP Dependency-Check (Gradle plugin + documented task)  ← **[Answer]: A**
+B) Document manual scan step
 
-B) No — skip all SECURITY rules (suitable for PoCs, prototypes, and experimental projects)
+## Q5. Version
+A) Keep versionCode 1 / versionName "1.0"
+B) Bump to versionName "1.0.0" (versionCode 1)  ← **[Answer]: B**
 
-X) Other (please describe after [Answer]: tag below)
-
-[Answer]: A
-
-## Question 2: Resiliency Extensions
-Should the resiliency baseline be applied to this project? (It is a set of
-directional design-time best practices derived from the AWS Well-Architected
-Reliability Pillar — oriented toward cloud/distributed workloads.)
-
-A) Yes — apply the resiliency baseline as directional best practices and design-time guidance
-
-B) No — skip the resiliency baseline (this is an offline, on-device Android app with no cloud/distributed backend, so the AWS-reliability-oriented baseline has little to act on)
-
-X) Other (please describe after [Answer]: tag below)
-
-[Answer]: A
-
-## Question 3: Property-Based Testing Extension
-Should property-based testing (PBT) rules be enforced for this project? (The
-puzzle engine — scramble, swap, solvability, completion — is pure algorithmic
-logic that suits PBT well.)
-
-A) Yes — enforce all PBT rules as blocking constraints (recommended for projects with business logic, data transformations, serialization, or stateful components)
-
-B) Partial — enforce PBT rules only for pure functions and serialization round-trips
-
-C) No — skip all PBT rules
-
-X) Other (please describe after [Answer]: tag below)
-
-[Answer]: A
-
-## Question 4: Delivery scope of this planning cycle
-The production spec is large (7 phases). How should AI-DLC plan/build it?
-
-A) Plan the whole program now (all phases as "units of work"), then build unit-by-unit with approval gates between each
-
-B) Plan + build **one phase at a time** — do full requirements→design→code→test for Phase 1 (architecture + Room persistence) first, then return for the next phase (smaller, safer cycles)
-
-C) Other (please describe after [Answer]: tag below)
-
-[Answer]: B
-
-## Question 5: Bundled-puzzle photos for a production release
-The 9 bundled photos are currently fetched at build time from picsum.photos
-(Unsplash). For a real store release the license/attribution should be clean.
-What should the bundled photos be?
-
-A) Keep picsum/Unsplash photos and document their license/attribution in PRIVACY/compliance docs
-
-B) Replace with explicitly CC0 / public-domain photos (e.g. from a known CC0 source) with attribution recorded
-
-C) You will provide your own licensed photos before release; keep current ones as placeholders meanwhile
-
-X) Other (please describe after [Answer]: tag below)
-
-[Answer]: A
-
-## Question 6: Minimum Android version (minSdk)
-Currently minSdk = 26 (Android 8.0). The modern photo picker
-(PickVisualMedia) is best on API 33+ but has a backport; CameraX supports 21+.
-What minSdk should production target?
-
-A) Keep minSdk 26 (Android 8.0) — widest device reach; use PickVisualMedia backport for older devices
-
-B) Raise to minSdk 24 (Android 7.0) — even wider reach
-
-C) Raise to minSdk 29 or higher (Android 10+) — fewer legacy edge cases, smaller test matrix
-
-X) Other (please describe after [Answer]: tag below)
-
-[Answer]: C
-
-## Question 7: App identity for release (applicationId & app name)
-Release builds need a stable application id. Current is
-`com.tessera.puzzle`, name "Tessera". Keep or change?
-
-A) Keep `com.tessera.puzzle` / "Tessera"
-
-B) Change the applicationId and/or display name (describe in Other)
-
-X) Other (please describe after [Answer]: tag below)
-
-[Answer]: A
-
-## Question 8: "Best score" definition
-For each puzzle+difficulty, best score is tracked. Rank primarily by:
-
-A) Best (lowest) completion time, with move count as secondary/displayed stat
-
-B) Best (lowest) move count, with time secondary
-
-C) Track and display both independently (best time AND best moves), no single ranking
-
-X) Other (please describe after [Answer]: tag below)
-
-[Answer]: A
+## Follow-up analysis (ambiguities)
+- Q3 was conditional; resolved by verifying Play's actual requirements (AAB, not
+  minification). No remaining ambiguity.
+- No other ambiguities: keystore creation involves passwords the USER supplies
+  and keeps (never generated or held by the assistant, never committed —
+  SECURITY-12).

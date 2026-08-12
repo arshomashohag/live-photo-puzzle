@@ -682,3 +682,59 @@
 **Context**: phase4-audio-haptics complete; awaiting on-device verification.
 
 ---
+
+## Phase 5 (Release & Hardening) — Requirements Analysis kickoff
+**Timestamp**: 2026-08-10T00:00:00Z
+**User Input**: "pick phase 5 if there's nothing left untill 4" + (clarifying answers) "Release target = Play Store AAB (signed); Keystore = Create a new keystore"
+**AI Response**: "Confirmed Phases 1–4 COMPLETE (incl. solve-reveal + hint CR + overlay-alignment fix). Starting Phase 5 AI-DLC cycle at Requirements Analysis. Request type: Upgrade/Hardening (release engineering). Scope: Multiple Components (build config, signing, logging, deps). Complexity: Moderate. Target output: signed Play Store AAB with new release keystore. Loaded requirements-analysis.md + security-baseline.md. Enabled extensions: Security Baseline, Resiliency Baseline, PBT (Full). Generating requirement-verification-questions.md."
+**Context**: Phase 5 Requirements Analysis start; gate pending user answers.
+
+---
+
+## Phase 5 — Requirements Analysis complete
+**Timestamp**: 2026-08-10T00:10:00Z
+**User Input**: (clarifying answers) "R8 = conditional: Google-required→Standard R8 else don't minify yet; Vuln scan = OWASP Dependency-Check (Gradle); Version = bump to 1.0.0"
+**AI Response**: "Resolved R8 condition by fact-check: Google Play does NOT require R8/minify/shrink (requires AAB + targetSdk 35 + signing + 64-bit, all satisfied) → NO minification this cycle. Wrote requirements.md + requirement-verification-questions.md. Security Baseline applicable rules: SECURITY-03 (release-safe logging, 5 sites), -09 (hardening), -10 (OWASP dep scan + pinning), -12 (keystore passwords user-held/gitignored, never in source), -15 (fail-safe). Others N/A (offline app, no network/API/auth). Keystore: assistant provides keytool command; USER generates + holds passwords; never committed."
+**Context**: Phase 5 Requirements Analysis complete; awaiting user approval before Workflow Planning.
+
+---
+
+## Phase 5 — Requirements approval
+**Timestamp**: 2026-08-10T00:12:00Z
+**User Input**: "approved"
+**AI Response**: "Requirements approved. Proceeding to Workflow Planning for Phase 5."
+**Context**: Phase 5 Requirements Analysis approved; entering Workflow Planning.
+
+---
+
+## Phase 5 — Workflow Planning approval
+**Timestamp**: 2026-08-10T00:20:00Z
+**User Input**: "approved"
+**AI Response**: "Workflow plan approved (EXECUTE: Code Generation + Build and Test; SKIP: App Design, Units Gen, Functional Design, NFR Req/Design, Infra Design). Proceeding to Code Generation Part 1 (plan)."
+**Context**: Phase 5 Workflow Planning approved; entering Code Generation.
+
+---
+
+## Phase 5 — Code Generation complete
+**Timestamp**: 2026-08-11T00:00:00Z
+**User Input**: "continue"
+**AI Response**: "Executed Code Generation. .gitignore (+*.jks,+keystore.properties, verified via check-ignore); keystore.properties.template (committed, no secrets); app/build.gradle.kts signingConfigs(release) guarded by keystore.properties existence + release build type wiring (unsigned if absent, never silent debug-sign) + versionName 1.0.0; OWASP dependency-check plugin (10.0.4) at root; docs/RELEASE_SIGNING.md (user-run keytool). VERIFICATION: unsigned bundleRelease OK (app-release.aab produced); signed bundleRelease with THROWAWAY keystore OK (META-INF/TESSERA.RSA present) then throwaway .jks+properties deleted; git confirms no signing material tracked; 53/53 unit tests pass; lint 0 errors; dependencyCheckAnalyze registered (NVD download documented, not run). Security: SECURITY-03/09/10/12/15 compliant; rest N/A (offline)."
+**Context**: Phase 5 Code Generation complete; awaiting user choice (Request Changes / Continue to Build and Test).
+
+---
+
+## Build and Test Stage (Phase 5 — Release & Hardening)
+**Timestamp**: 2026-08-12T00:00:00Z
+**User Input**: "I've tested in my phone. It's working. What's next?"
+**AI Response**: "Executed Build and Test stage. Ran gates for real: :app:testDebugUnitTest → 53/53 pass, 0 failures/errors; :app:lintDebug → 0 errors; :app:bundleRelease → BUILD SUCCESSFUL, app-release.aab (~14.6 MB). Verified git tracks no .jks/keystore.properties. Wrote instruction files (build, unit-test, integration, security, summary) under aidlc-docs/construction/phase5-release/build-and-test/. Updated aidlc-state.md. On-device solve-reveal + hint alignment confirmed working by user."
+**Build Status**: Success (signed AAB proven earlier with throwaway key; deleted)
+**Test Status**: Pass (53/53 unit, lint 0 errors)
+**Files Generated**:
+- phase5-release/build-and-test/build-instructions.md
+- phase5-release/build-and-test/unit-test-instructions.md
+- phase5-release/build-and-test/integration-test-instructions.md
+- phase5-release/build-and-test/security-test-instructions.md
+- phase5-release/build-and-test/build-and-test-summary.md
+**Context**: Phase 5 CONSTRUCTION complete (Code Generation + Build and Test). Awaiting Operations approval. Phase 5 code changes not yet committed.
+
+---

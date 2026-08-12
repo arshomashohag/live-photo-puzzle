@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield (existing Phase-0 slice; production build-out ahead)
 - **Start Date**: 2026-08-09T10:21:33Z
-- **Current Stage**: CONSTRUCTION (Phase 4 Audio & Haptics) - Code Generation COMPLETE (SoundPool SFX + Vibrator haptics, gated on Settings, wired to move/complete); 45/45 unit tests, lint 0, apk built — awaiting on-device review. Prior: Phase 4 CR (image/contrast/alignment/swipe) verified on-device.
+- **Current Stage**: Phase 5 Release & Hardening — **CONSTRUCTION COMPLETE** (Code Generation ✅ + Build and Test ✅), awaiting Operations approval. Delivered: signed Play Store AAB (proven via throwaway key, then deleted; nothing tracked) + unsigned fail-open path + OWASP dep-scan wired (report-only; NVD run deferred to pre-release) + release-safe logging verified + versionName 1.0.0; NO R8/minify (not a Play requirement; deferred). Gates: 53/53 unit tests, lint 0 errors, `bundleRelease` ✅ (~14.6 MB AAB), on-device solve-reveal/hint confirmed by user. User creates the real keystore/passwords (SECURITY-12). Phase 5 changes not yet committed. Next: Operations (or Phase 6 Docs & Compliance).
 - **Phase 3**: COMPLETE (adaptive/dark/a11y)
 - **Phase 2**: COMPLETE (custom photo puzzles; lint clean; 29 tests)
 - **Phase 1**: COMPLETE (architecture + Room persistence; adjacent-swap CR applied)
