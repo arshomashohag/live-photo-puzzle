@@ -22,3 +22,6 @@ keystore.properties
 
 # AI-DLC rule details (local workflow tooling, not app source)
 .aidlc-rule-details/
+
+# NVD
+.nvd*
