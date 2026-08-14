@@ -25,3 +25,6 @@ keystore.properties
 
 # NVD
 .nvd*
+
+# Claude
+.claude/

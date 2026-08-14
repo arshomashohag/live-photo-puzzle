@@ -41,10 +41,16 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the layer breakdown.
 
 ## Build & run
 
-Set the environment (macOS example):
+Set the environment (macOS example). This build requires **JDK 21** — point
+`JAVA_HOME` at a real JDK 21 install. `java_home -v 21` only works if a JDK 21
+is registered with macOS; otherwise use the explicit path (e.g. Homebrew's
+`openjdk@21`):
 
 ```bash
+# If JDK 21 is registered with macOS:
 export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+# Or point at an explicit JDK 21 (Homebrew example):
+export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
 export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
 ```
 
@@ -87,3 +93,5 @@ Follow [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) before uploading to Play, an
 | [PLAY_STORE_COMPLIANCE.md](PLAY_STORE_COMPLIANCE.md) | Data Safety, permissions, ratings |
 | [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) | pre-upload gate |
 | [docs/RELEASE_SIGNING.md](docs/RELEASE_SIGNING.md) | keystore + signed AAB |
+| [docs/CICD_SETUP.md](docs/CICD_SETUP.md) | CI, signed release builds, Pages hosting |
+| [CHANGELOG.md](CHANGELOG.md) | release history |
