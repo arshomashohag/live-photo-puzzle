@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#F2603C"/>
+  <g>
+    <!-- 3x3 grid centered: tile 82, gap 26 -> block 3*82+2*26=298, start=(512-298)/2=107 -->
+    <rect x="107" y="107" width="82" height="82" rx="20" fill="#17B892"/>
+    <rect x="215" y="107" width="82" height="82" rx="20" fill="#FFF6EF"/>
+    <rect x="323" y="107" width="82" height="82" rx="20" fill="#FFF6EF"/>
+    <rect x="107" y="215" width="82" height="82" rx="20" fill="#FFF6EF"/>
+    <rect x="215" y="215" width="82" height="82" rx="20" fill="#FF8A2B"/>
+    <rect x="323" y="215" width="82" height="82" rx="20" fill="#FFF6EF"/>
+    <rect x="107" y="323" width="82" height="82" rx="20" fill="#FFF6EF"/>
+    <rect x="215" y="323" width="82" height="82" rx="20" fill="#FFF6EF"/>
+    <rect x="323" y="323" width="82" height="82" rx="20" fill="#7C5CFF"/>
+  </g>
+</svg>
