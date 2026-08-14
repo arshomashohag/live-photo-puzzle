@@ -87,3 +87,5 @@ Follow [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) before uploading to Play, an
 | [PLAY_STORE_COMPLIANCE.md](PLAY_STORE_COMPLIANCE.md) | Data Safety, permissions, ratings |
 | [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) | pre-upload gate |
 | [docs/RELEASE_SIGNING.md](docs/RELEASE_SIGNING.md) | keystore + signed AAB |
+| [docs/CICD_SETUP.md](docs/CICD_SETUP.md) | CI, signed release builds, Pages hosting |
+| [CHANGELOG.md](CHANGELOG.md) | release history |

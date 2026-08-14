@@ -59,3 +59,7 @@ environment from [README.md](README.md) is set (`JAVA_HOME` → JDK 21,
 
 - **R8/minification is off** this cycle (not a Play requirement). If you enable
   it later, re-test thoroughly and add ProGuard/R8 keep rules as needed.
+- **Automated builds:** pushing a `vX.Y.Z` tag builds the signed AAB via
+  GitHub Actions and attaches it to a GitHub Release — see
+  [docs/CICD_SETUP.md](docs/CICD_SETUP.md). You still upload to Play
+  manually.
