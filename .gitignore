@@ -28,3 +28,6 @@ keystore.properties
 
 # Claude
 .claude/
+
+# Large raw media (keep out of git history; host/share separately)
+assets/*.mp4
