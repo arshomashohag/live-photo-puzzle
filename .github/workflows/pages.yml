@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - index.html
       - PRIVACY.md
       - CHANGELOG.md
       - .github/workflows/pages.yml
@@ -70,12 +71,9 @@ jobs:
           (site / "changelog.html").write_text(
               render("CHANGELOG.md", "Tessera — Changelog"),
               encoding="utf-8")
-          (site / "index.html").write_text(
-              "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
-              "<title>Tessera</title></head><body><h1>Tessera</h1>"
-              "<ul><li><a href=\"privacy.html\">Privacy Policy</a></li>"
-              "<li><a href=\"changelog.html\">Changelog</a></li></ul>"
-              "</body></html>", encoding="utf-8")
+          # The landing page is the site home; it links to privacy.html.
+          import shutil
+          shutil.copyfile("index.html", site / "index.html")
           print("rendered:", [p.name for p in site.iterdir()])
           PY
 
