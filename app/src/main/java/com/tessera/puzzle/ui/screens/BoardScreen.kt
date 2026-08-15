@@ -480,9 +480,9 @@ private fun GuideOverlay(reducedMotion: Boolean, onDismiss: () -> Unit) {
 }
 
 /**
- * Looping swipe cue: a coral puck slides left→right along a faint track while
- * an arrow pulses, mimicking a finger-drag. Static (left-parked, dim arrow)
- * under reduced motion.
+ * Looping swipe cue: a single near-transparent bubble drifts left↔right,
+ * mimicking a finger dragging a tile. Left-parked (static) under reduced
+ * motion.
  */
 @Composable
 private fun SwipeHint(reducedMotion: Boolean) {
@@ -490,51 +490,24 @@ private fun SwipeHint(reducedMotion: Boolean) {
     val transition = rememberInfiniteTransition(label = "swipe")
     val animatedShift by transition.animateFloat(
         initialValue = 0f,
-        targetValue = 76f,
+        targetValue = 84f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1100, easing = FastOutSlowInEasing),
+            animation = tween(1200, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse,
         ),
         label = "swipeShift",
     )
-    val animatedArrow by transition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1100, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "arrowAlpha",
-    )
     val shift = if (reducedMotion) 0f else animatedShift
-    val arrowAlpha = if (reducedMotion) 0.5f else animatedArrow
     Box(
         Modifier.size(width = trackWidth, height = 56.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
-        // faint track
-        Box(
-            Modifier
-                .align(Alignment.Center)
-                .size(width = trackWidth, height = 6.dp)
-                .clip(TesseraShapes.pill)
-                .background(androidx.compose.ui.graphics.Color(0x33FFFFFF)),
-        )
-        // pulsing arrow at the end
-        Text(
-            "→",
-            style = TesseraType.display.copy(color = androidx.compose.ui.graphics.Color.White),
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .graphicsLayer { alpha = arrowAlpha },
-        )
-        // sliding translucent ball (a soft touch indicator)
         Box(
             Modifier
                 .offset(x = shift.dp)
-                .size(48.dp)
+                .size(46.dp)
                 .clip(CircleShape)
-                .background(androidx.compose.ui.graphics.Color(0x47FFFFFF))
+                .background(androidx.compose.ui.graphics.Color(0x4DFFFFFF))
                 .border(2.dp, androidx.compose.ui.graphics.Color(0x8CFFFFFF), CircleShape),
         )
     }
