@@ -63,3 +63,5 @@ environment from [README.md](README.md) is set (`JAVA_HOME` → JDK 21,
   GitHub Actions and attaches it to a GitHub Release — see
   [docs/CICD_SETUP.md](docs/CICD_SETUP.md). You still upload to Play
   manually.
+- **Target API:** the app targets Android 16 (API 36) as of 1.0.1, meeting
+  Play's target-API requirement (deadline Aug 31, 2026).
