@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -42,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
@@ -434,84 +436,106 @@ private fun PauseOverlay(onResume: () -> Unit, onRestart: () -> Unit, onExit: ()
 
 /**
  * First-run coach-mark shown over the board the first time a puzzle is played.
- * Explains the swap gesture with a looping swipe indicator (paused when the
- * user prefers reduced motion). Dismissed by the button or by tapping the
- * scrim; [onDismiss] persists the "seen" flag so it never returns.
+ * A near-transparent radial dim over the live board with an animated sliding
+ * puck (the swipe gesture) and a caption beneath it — no card, no button.
+ * Tapping anywhere dismisses it; [onDismiss] persists the "seen" flag so it
+ * never returns. The animation is paused for reduced-motion users.
  */
 @Composable
 private fun GuideOverlay(reducedMotion: Boolean, onDismiss: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
-            .background(SCRIM)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(GUIDE_DIM_STRONG, GUIDE_DIM_SOFT, androidx.compose.ui.graphics.Color.Transparent),
+                ),
+            )
             .clickableNoRipple(onDismiss)
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .semantics {
                 contentDescription =
                     "How to play: swipe a tile toward its neighbour to swap them. " +
-                        "Tap to dismiss."
+                        "Tap anywhere to dismiss."
             },
         contentAlignment = Alignment.Center,
     ) {
-        RoundedCard(Modifier.padding(32.dp).widthIn(max = 360.dp)) {
-            Column(
-                Modifier.fillMaxWidth().padding(28.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text("SWIPE TO SWAP", style = TesseraType.display.copy(color = TesseraColors.Ink))
-                SwipeHint(reducedMotion)
-                Text(
-                    "Swipe any tile up, down, left or right to swap it with the " +
-                        "neighbour beside it. Line the photo back up to win.",
-                    style = TesseraType.body.copy(color = TesseraColors.Muted),
-                    textAlign = TextAlign.Center,
-                )
-                PillButton("Got it", onDismiss, Modifier.fillMaxWidth())
-            }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(18.dp),
+        ) {
+            SwipeHint(reducedMotion)
+            Text(
+                "Swipe a tile to swap it",
+                style = TesseraType.heading.copy(color = androidx.compose.ui.graphics.Color.White),
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                "Tap anywhere to dismiss",
+                style = TesseraType.label.copy(color = androidx.compose.ui.graphics.Color(0xCCFFFFFF)),
+                textAlign = TextAlign.Center,
+            )
         }
     }
 }
 
 /**
- * A small looping swipe cue: a tile that slides right and back, with a
- * double-headed arrow. Static (centered) under reduced motion.
+ * Looping swipe cue: a coral puck slides left→right along a faint track while
+ * an arrow pulses, mimicking a finger-drag. Static (left-parked, dim arrow)
+ * under reduced motion.
  */
 @Composable
 private fun SwipeHint(reducedMotion: Boolean) {
-    val shift = if (reducedMotion) {
-        0f
-    } else {
-        val transition = rememberInfiniteTransition(label = "swipe")
-        val v by transition.animateFloat(
-            initialValue = 0f,
-            targetValue = 26f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(900, easing = FastOutSlowInEasing),
-                repeatMode = RepeatMode.Reverse,
-            ),
-            label = "swipeShift",
-        )
-        v
-    }
-    Row(
-        Modifier.padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    val trackWidth = 132.dp
+    val transition = rememberInfiniteTransition(label = "swipe")
+    val animatedShift by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 76f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1100, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "swipeShift",
+    )
+    val animatedArrow by transition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1100, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "arrowAlpha",
+    )
+    val shift = if (reducedMotion) 0f else animatedShift
+    val arrowAlpha = if (reducedMotion) 0.5f else animatedArrow
+    Box(
+        Modifier.size(width = trackWidth, height = 56.dp),
+        contentAlignment = Alignment.CenterStart,
     ) {
+        // faint track
+        Box(
+            Modifier
+                .align(Alignment.Center)
+                .size(width = trackWidth, height = 6.dp)
+                .clip(TesseraShapes.pill)
+                .background(androidx.compose.ui.graphics.Color(0x33FFFFFF)),
+        )
+        // pulsing arrow at the end
+        Text(
+            "→",
+            style = TesseraType.display.copy(color = androidx.compose.ui.graphics.Color.White),
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .graphicsLayer { alpha = arrowAlpha },
+        )
+        // sliding translucent ball (a soft touch indicator)
         Box(
             Modifier
                 .offset(x = shift.dp)
-                .size(34.dp)
-                .clip(TesseraShapes.card)
-                .background(TesseraColors.Primary),
-        )
-        Text("⇄", style = TesseraType.display.copy(color = TesseraColors.Muted))
-        Box(
-            Modifier
-                .size(34.dp)
-                .clip(TesseraShapes.card)
-                .background(TesseraColors.SurfaceAlt),
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(androidx.compose.ui.graphics.Color(0x47FFFFFF))
+                .border(2.dp, androidx.compose.ui.graphics.Color(0x8CFFFFFF), CircleShape),
         )
     }
 }
@@ -545,3 +569,8 @@ private const val REVEAL_HOLD_MS = 2000
 private const val HINT_MS = 2500
 private const val HINT_FADE_MS = 200
 private val SCRIM = androidx.compose.ui.graphics.Color(0xB3000000)
+
+// Near-transparent radial dim for the first-run guide: a soft spotlight on the
+// swipe cue that keeps the board visible underneath. Much lighter than SCRIM.
+private val GUIDE_DIM_STRONG = androidx.compose.ui.graphics.Color(0x4D2E1F1A)
+private val GUIDE_DIM_SOFT = androidx.compose.ui.graphics.Color(0x1A2E1F1A)
