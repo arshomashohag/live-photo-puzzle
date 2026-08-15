@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -210,6 +211,9 @@ fun BoardScreen(
                 )
             }
         }
+
+        // Push the controls to the bottom of the screen, away from the board.
+        Spacer(Modifier.weight(1f))
 
         Row(
             Modifier.fillMaxWidth().widthIn(max = 560.dp),
