@@ -89,6 +89,7 @@ data class Settings(
     val soundEnabled: Boolean = true,
     val hapticsEnabled: Boolean = true,
     val theme: ThemeMode = ThemeMode.SYSTEM,
+    val guideShown: Boolean = false,
 )
 
 /**

@@ -3,7 +3,11 @@ package com.tessera.puzzle.ui.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,8 +21,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -35,6 +41,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
@@ -42,6 +49,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -53,7 +61,9 @@ import com.tessera.puzzle.game.GameViewModel
 import com.tessera.puzzle.ui.theme.PillButton
 import com.tessera.puzzle.ui.theme.RoundedCard
 import com.tessera.puzzle.ui.theme.TesseraColors
+import com.tessera.puzzle.ui.theme.TesseraShapes
 import com.tessera.puzzle.ui.theme.TesseraType
+import com.tessera.puzzle.ui.theme.clickableNoRipple
 import com.tessera.puzzle.ui.theme.rememberReducedMotion
 import kotlin.math.abs
 import kotlinx.coroutines.launch
@@ -82,6 +92,7 @@ fun BoardScreen(
 
     val hintsRemaining by game.hintsRemaining.collectAsStateWithLifecycle()
     val fullImage by game.fullImage.collectAsStateWithLifecycle()
+    val guideVisible by game.guideVisible.collectAsStateWithLifecycle()
     val reducedMotion = rememberReducedMotion()
     var hintVisible by remember { mutableStateOf(false) }
     val hintAlpha = remember { Animatable(0f) }
@@ -239,6 +250,13 @@ fun BoardScreen(
             onResume = { paused = false },
             onRestart = { paused = false; game.restart() },
             onExit = { paused = false; game.exitBoard(); onExit() },
+        )
+    }
+
+    if (guideVisible && !paused) {
+        GuideOverlay(
+            reducedMotion = reducedMotion,
+            onDismiss = { game.dismissGuide() },
         )
     }
 }
@@ -411,6 +429,90 @@ private fun PauseOverlay(onResume: () -> Unit, onRestart: () -> Unit, onExit: ()
                 PillButton("Exit puzzle", onExit, Modifier.fillMaxWidth(), filled = false)
             }
         }
+    }
+}
+
+/**
+ * First-run coach-mark shown over the board the first time a puzzle is played.
+ * Explains the swap gesture with a looping swipe indicator (paused when the
+ * user prefers reduced motion). Dismissed by the button or by tapping the
+ * scrim; [onDismiss] persists the "seen" flag so it never returns.
+ */
+@Composable
+private fun GuideOverlay(reducedMotion: Boolean, onDismiss: () -> Unit) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(SCRIM)
+            .clickableNoRipple(onDismiss)
+            .windowInsetsPadding(WindowInsets.safeDrawing)
+            .semantics {
+                contentDescription =
+                    "How to play: swipe a tile toward its neighbour to swap them. " +
+                        "Tap to dismiss."
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        RoundedCard(Modifier.padding(32.dp).widthIn(max = 360.dp)) {
+            Column(
+                Modifier.fillMaxWidth().padding(28.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text("SWIPE TO SWAP", style = TesseraType.display.copy(color = TesseraColors.Ink))
+                SwipeHint(reducedMotion)
+                Text(
+                    "Swipe any tile up, down, left or right to swap it with the " +
+                        "neighbour beside it. Line the photo back up to win.",
+                    style = TesseraType.body.copy(color = TesseraColors.Muted),
+                    textAlign = TextAlign.Center,
+                )
+                PillButton("Got it", onDismiss, Modifier.fillMaxWidth())
+            }
+        }
+    }
+}
+
+/**
+ * A small looping swipe cue: a tile that slides right and back, with a
+ * double-headed arrow. Static (centered) under reduced motion.
+ */
+@Composable
+private fun SwipeHint(reducedMotion: Boolean) {
+    val shift = if (reducedMotion) {
+        0f
+    } else {
+        val transition = rememberInfiniteTransition(label = "swipe")
+        val v by transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 26f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(900, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "swipeShift",
+        )
+        v
+    }
+    Row(
+        Modifier.padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Box(
+            Modifier
+                .offset(x = shift.dp)
+                .size(34.dp)
+                .clip(TesseraShapes.card)
+                .background(TesseraColors.Primary),
+        )
+        Text("⇄", style = TesseraType.display.copy(color = TesseraColors.Muted))
+        Box(
+            Modifier
+                .size(34.dp)
+                .clip(TesseraShapes.card)
+                .background(TesseraColors.SurfaceAlt),
+        )
     }
 }
 

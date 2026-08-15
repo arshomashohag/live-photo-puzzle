@@ -16,7 +16,9 @@ import com.tessera.puzzle.domain.model.Puzzle
 import com.tessera.puzzle.domain.model.persistence.ImageRef
 import com.tessera.puzzle.domain.model.persistence.PuzzleRecord
 import com.tessera.puzzle.domain.model.persistence.PuzzleSource
+import com.tessera.puzzle.domain.model.GuideDecider
 import com.tessera.puzzle.domain.repository.PuzzleRepository
+import com.tessera.puzzle.domain.repository.SettingsRepository
 import com.tessera.puzzle.domain.repository.StatsRepository
 import com.tessera.puzzle.feedback.FeedbackController
 import com.tessera.puzzle.presentation.BoardUiState
@@ -50,6 +52,7 @@ class GameViewModel @Inject constructor(
     private val app: Application,
     private val puzzleRepository: PuzzleRepository,
     private val statsRepository: StatsRepository,
+    private val settingsRepository: SettingsRepository,
     private val fileStore: PuzzleFileStore,
     private val feedback: FeedbackController,
     @IoDispatcher private val io: CoroutineDispatcher,
@@ -78,6 +81,23 @@ class GameViewModel @Inject constructor(
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HintState.MAX)
 
     val fullImage: StateFlow<ImageBitmap?> = _fullImage.asStateFlow()
+
+    /**
+     * First-run swipe guide overlay: visible only when it has never been shown
+     * AND a board is active (see [GuideDecider]). Dismissing it persists the
+     * flag so it never appears again.
+     */
+    val guideVisible: StateFlow<Boolean> =
+        combine(settingsRepository.settings, _board) { settings, board ->
+            GuideDecider.shouldShow(
+                guideShown = settings.guideShown,
+                hasActiveBoard = board != null,
+            )
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    fun dismissGuide() {
+        viewModelScope.launch { settingsRepository.setGuideShown(true) }
+    }
 
     // In-progress boards are not persisted: no Continue card, no resume.
     val homeUiState: StateFlow<HomeUiState> =
