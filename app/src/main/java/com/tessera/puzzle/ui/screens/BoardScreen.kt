@@ -3,7 +3,11 @@ package com.tessera.puzzle.ui.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,17 +17,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -35,6 +43,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
@@ -42,6 +52,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -53,7 +64,9 @@ import com.tessera.puzzle.game.GameViewModel
 import com.tessera.puzzle.ui.theme.PillButton
 import com.tessera.puzzle.ui.theme.RoundedCard
 import com.tessera.puzzle.ui.theme.TesseraColors
+import com.tessera.puzzle.ui.theme.TesseraShapes
 import com.tessera.puzzle.ui.theme.TesseraType
+import com.tessera.puzzle.ui.theme.clickableNoRipple
 import com.tessera.puzzle.ui.theme.rememberReducedMotion
 import kotlin.math.abs
 import kotlinx.coroutines.launch
@@ -82,6 +95,7 @@ fun BoardScreen(
 
     val hintsRemaining by game.hintsRemaining.collectAsStateWithLifecycle()
     val fullImage by game.fullImage.collectAsStateWithLifecycle()
+    val guideVisible by game.guideVisible.collectAsStateWithLifecycle()
     val reducedMotion = rememberReducedMotion()
     var hintVisible by remember { mutableStateOf(false) }
     val hintAlpha = remember { Animatable(0f) }
@@ -198,6 +212,9 @@ fun BoardScreen(
             }
         }
 
+        // Push the controls to the bottom of the screen, away from the board.
+        Spacer(Modifier.weight(1f))
+
         Row(
             Modifier.fillMaxWidth().widthIn(max = 560.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -239,6 +256,13 @@ fun BoardScreen(
             onResume = { paused = false },
             onRestart = { paused = false; game.restart() },
             onExit = { paused = false; game.exitBoard(); onExit() },
+        )
+    }
+
+    if (guideVisible && !paused) {
+        GuideOverlay(
+            reducedMotion = reducedMotion,
+            onDismiss = { game.dismissGuide() },
         )
     }
 }
@@ -414,6 +438,85 @@ private fun PauseOverlay(onResume: () -> Unit, onRestart: () -> Unit, onExit: ()
     }
 }
 
+/**
+ * First-run coach-mark shown over the board the first time a puzzle is played.
+ * A near-transparent radial dim over the live board with an animated sliding
+ * puck (the swipe gesture) and a caption beneath it — no card, no button.
+ * Tapping anywhere dismisses it; [onDismiss] persists the "seen" flag so it
+ * never returns. The animation is paused for reduced-motion users.
+ */
+@Composable
+private fun GuideOverlay(reducedMotion: Boolean, onDismiss: () -> Unit) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(GUIDE_DIM_STRONG, GUIDE_DIM_SOFT, androidx.compose.ui.graphics.Color.Transparent),
+                ),
+            )
+            .clickableNoRipple(onDismiss)
+            .windowInsetsPadding(WindowInsets.safeDrawing)
+            .semantics {
+                contentDescription =
+                    "How to play: swipe a tile toward its neighbour to swap them. " +
+                        "Tap anywhere to dismiss."
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(18.dp),
+        ) {
+            SwipeHint(reducedMotion)
+            Text(
+                "Swipe a tile to swap it",
+                style = TesseraType.heading.copy(color = androidx.compose.ui.graphics.Color.White),
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                "Tap anywhere to dismiss",
+                style = TesseraType.label.copy(color = androidx.compose.ui.graphics.Color(0xCCFFFFFF)),
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+/**
+ * Looping swipe cue: a single near-transparent bubble drifts left↔right,
+ * mimicking a finger dragging a tile. Left-parked (static) under reduced
+ * motion.
+ */
+@Composable
+private fun SwipeHint(reducedMotion: Boolean) {
+    val trackWidth = 132.dp
+    val transition = rememberInfiniteTransition(label = "swipe")
+    val animatedShift by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 84f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "swipeShift",
+    )
+    val shift = if (reducedMotion) 0f else animatedShift
+    Box(
+        Modifier.size(width = trackWidth, height = 56.dp),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Box(
+            Modifier
+                .offset(x = shift.dp)
+                .size(46.dp)
+                .clip(CircleShape)
+                .background(androidx.compose.ui.graphics.Color(0x4DFFFFFF))
+                .border(2.dp, androidx.compose.ui.graphics.Color(0x8CFFFFFF), CircleShape),
+        )
+    }
+}
+
 @Composable
 private fun BoardErrorOverlay(message: String, onExit: () -> Unit) {
     Box(
@@ -443,3 +546,8 @@ private const val REVEAL_HOLD_MS = 2000
 private const val HINT_MS = 2500
 private const val HINT_FADE_MS = 200
 private val SCRIM = androidx.compose.ui.graphics.Color(0xB3000000)
+
+// Near-transparent radial dim for the first-run guide: a soft spotlight on the
+// swipe cue that keeps the board visible underneath. Much lighter than SCRIM.
+private val GUIDE_DIM_STRONG = androidx.compose.ui.graphics.Color(0x4D2E1F1A)
+private val GUIDE_DIM_SOFT = androidx.compose.ui.graphics.Color(0x1A2E1F1A)

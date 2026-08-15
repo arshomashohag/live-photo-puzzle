@@ -55,4 +55,5 @@ interface SettingsRepository {
     suspend fun setSoundEnabled(enabled: Boolean)
     suspend fun setHapticsEnabled(enabled: Boolean)
     suspend fun setTheme(mode: ThemeMode)
+    suspend fun setGuideShown(shown: Boolean)
 }

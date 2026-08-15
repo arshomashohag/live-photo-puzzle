@@ -23,6 +23,7 @@ class SettingsRepositoryImpl @Inject constructor(
             theme = runCatching {
                 ThemeMode.valueOf(prefs[KEY_THEME] ?: ThemeMode.SYSTEM.name)
             }.getOrDefault(ThemeMode.SYSTEM),
+            guideShown = prefs[KEY_GUIDE_SHOWN] ?: false,
         )
     }
 
@@ -38,9 +39,14 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { it[KEY_THEME] = mode.name }
     }
 
+    override suspend fun setGuideShown(shown: Boolean) {
+        dataStore.edit { it[KEY_GUIDE_SHOWN] = shown }
+    }
+
     private companion object {
         val KEY_SOUND = booleanPreferencesKey("sound_enabled")
         val KEY_HAPTICS = booleanPreferencesKey("haptics_enabled")
         val KEY_THEME = stringPreferencesKey("theme_mode")
+        val KEY_GUIDE_SHOWN = booleanPreferencesKey("guide_shown")
     }
 }
