@@ -1,5 +1,6 @@
 package com.tessera.puzzle.ui.screens
 
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,13 +20,21 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.tessera.puzzle.domain.model.Difficulty
 import com.tessera.puzzle.domain.model.layoutSpec
 import com.tessera.puzzle.domain.model.persistence.ImageRef
@@ -92,8 +101,30 @@ private fun PuzzleCard(
                             Box(Modifier.fillMaxWidth().aspectRatio(1f).background(TesseraColors.Sky))
                         }
                     }
-                    is ImageRef.FileRef ->
-                        Box(Modifier.fillMaxWidth().aspectRatio(1f).background(TesseraColors.Sky))
+                    is ImageRef.FileRef -> {
+                        // Load the custom puzzle's thumbnail from app-internal
+                        // storage (same pattern as MyPuzzlesScreen). The Sky box
+                        // shows only while decoding / if the file is missing.
+                        val thumbPath = ref.thumbPath
+                        var thumb by remember(thumbPath) { mutableStateOf<ImageBitmap?>(null) }
+                        LaunchedEffect(thumbPath) {
+                            thumb = withContext(Dispatchers.IO) {
+                                runCatching {
+                                    BitmapFactory.decodeFile(thumbPath)?.asImageBitmap()
+                                }.getOrNull()
+                            }
+                        }
+                        Box(Modifier.fillMaxWidth().aspectRatio(1f).background(TesseraColors.Sky)) {
+                            thumb?.let {
+                                Image(
+                                    bitmap = it,
+                                    contentDescription = p.name,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize(),
+                                )
+                            }
+                        }
+                    }
                 }
                 if (resumable) {
                     Box(
