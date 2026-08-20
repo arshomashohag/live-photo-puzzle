@@ -32,6 +32,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -179,6 +180,10 @@ fun BoardScreen(
             }
         }
 
+        // Center the board in the free space between the header and the controls:
+        // equal flexible spacers above and below the board pin it to the middle.
+        Spacer(Modifier.weight(1f))
+
         Box(
             Modifier.fillMaxWidth().widthIn(max = 560.dp),
             contentAlignment = Alignment.Center,
@@ -207,12 +212,14 @@ fun BoardScreen(
                         .widthIn(max = 560.dp)
                         .aspectRatio(1f)
                         .graphicsLayer { alpha = hintAlpha.value }
-                        .border(1.dp, TesseraColors.Ink),
+                        .clip(RoundedCornerShape(TILE_RADIUS)),
                 )
             }
         }
 
-        // Push the controls to the bottom of the screen, away from the board.
+        // Matching spacer below the board — together with the one above it, this
+        // centers the board vertically while the controls stay pinned to the
+        // bottom safe-area.
         Spacer(Modifier.weight(1f))
 
         Row(
@@ -283,6 +290,11 @@ private fun PuzzleBoard(
     var anim by remember { mutableStateOf<TileAnim?>(null) }
     var animating by remember { mutableStateOf(false) }
 
+    // Touch cue: while a finger is held on a tile, its swappable neighbors bounce
+    // so the player sees which tiles it can swap with. Cleared on release/swipe.
+    var pressedPos by remember { mutableStateOf<Int?>(null) }
+    val bouncing = pressedPos?.let { Grid.neighbors(it, gridSize).toSet() } ?: emptySet()
+
     fun runSwipe(pos: Int, dir: Direction) {
         if (animating) return
         val target = Grid.neighborInDirection(pos, dir, gridSize) ?: return
@@ -307,10 +319,16 @@ private fun PuzzleBoard(
             .fillMaxWidth()
             .widthIn(max = 560.dp)
             .aspectRatio(1f)
-            .border(1.dp, TesseraColors.Ink)
             .pointerInput(gridSize, board.order.size) {
-                detectTileSwipes(gridSize) { pos, dir -> runSwipe(pos, dir) }
+                detectTileSwipes(
+                    gridSize = gridSize,
+                    onPress = { pos -> pressedPos = pos },
+                    onRelease = { pressedPos = null },
+                    onSwipe = { pos, dir -> runSwipe(pos, dir) },
+                )
             },
+        horizontalArrangement = Arrangement.spacedBy(TILE_GAP),
+        verticalArrangement = Arrangement.spacedBy(TILE_GAP),
         userScrollEnabled = false,
     ) {
         val sel = board.selected
@@ -332,18 +350,43 @@ private fun PuzzleBoard(
                 null
             }
 
+            // Bounce cue: neighbors of the pressed tile gently pulse while the
+            // finger is held. A single Animatable per tile; loops via a
+            // LaunchedEffect and settles back to rest on release. Static under
+            // reduced motion.
+            val isBouncing = position in bouncing
+            val bounceScale = remember { Animatable(1f) }
+            LaunchedEffect(isBouncing, reducedMotion) {
+                if (isBouncing && !reducedMotion) {
+                    bounceScale.animateTo(
+                        targetValue = BOUNCE_SCALE,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(BOUNCE_MS, easing = FastOutSlowInEasing),
+                            repeatMode = RepeatMode.Reverse,
+                        ),
+                    )
+                } else {
+                    bounceScale.animateTo(1f, tween(BOUNCE_SETTLE_MS))
+                }
+            }
+
+            val tileShape = RoundedCornerShape(TILE_RADIUS)
             Box(
                 Modifier
                     .aspectRatio(1f)
+                    .graphicsLayer {
+                        scaleX = bounceScale.value
+                        scaleY = bounceScale.value
+                    }
+                    .clip(tileShape)
                     .then(
-                        // No neutral border: adjacent tiles would each draw an
-                        // inset hairline, producing a visible ~1px seam between
-                        // matching tiles. Only draw a border to highlight the
-                        // selected / swappable tiles during play.
+                        // Highlight the selected / swappable tiles during play.
+                        // The 2px gap + rounded clip already separate tiles, so
+                        // there is no seam to worry about between matching tiles.
                         when {
                             board.isSolved -> Modifier
-                            selected -> Modifier.border(3.dp, TesseraColors.Primary)
-                            canSwap -> Modifier.border(2.dp, TesseraColors.PrimaryLight)
+                            selected -> Modifier.border(3.dp, TesseraColors.Primary, tileShape)
+                            canSwap -> Modifier.border(2.dp, TesseraColors.PrimaryLight, tileShape)
                             else -> Modifier
                         },
                     )
@@ -357,8 +400,12 @@ private fun PuzzleBoard(
                 val tile = tiles.getOrNull(sourceIndex)
                 val tileMod = if (slideFrac != null) {
                     Modifier.graphicsLayer {
-                        translationX = slideFrac.first * size.width * slide.value
-                        translationY = slideFrac.second * size.height * slide.value
+                        // Travel a full cell pitch: tile size plus the inter-tile
+                        // gap, so a sliding tile lands exactly on its neighbor's
+                        // cell rather than falling short by the gap width.
+                        val gapPx = TILE_GAP.toPx()
+                        translationX = slideFrac.first * (size.width + gapPx) * slide.value
+                        translationY = slideFrac.second * (size.height + gapPx) * slide.value
                     }
                 } else {
                     Modifier
@@ -383,9 +430,15 @@ private fun PuzzleBoard(
  * direction). Registers on release when total travel exceeds [SWIPE_THRESHOLD_DP]
  * along the dominant axis — one move per gesture; small jitters are ignored so
  * accidental taps don't move tiles.
+ *
+ * [onPress]/[onRelease] bracket the whole gesture (finger down → up/cancel) with
+ * the pressed tile position, so the UI can cue which neighbors are swappable
+ * while the finger is held.
  */
 private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.detectTileSwipes(
     gridSize: Int,
+    onPress: (pos: Int) -> Unit,
+    onRelease: () -> Unit,
     onSwipe: (pos: Int, dir: Direction) -> Unit,
 ) {
     val thresholdPx = SWIPE_THRESHOLD_DP.dp.toPx()
@@ -395,14 +448,19 @@ private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.detectTi
         val col = (down.position.x / cell).toInt().coerceIn(0, gridSize - 1)
         val row = (down.position.y / cell).toInt().coerceIn(0, gridSize - 1)
         val pos = row * gridSize + col
+        onPress(pos)
         var dx = 0f
         var dy = 0f
-        while (true) {
-            val event = awaitPointerEvent()
-            val change = event.changes.firstOrNull { it.id == down.id } ?: break
-            dx += change.positionChange().x
-            dy += change.positionChange().y
-            if (!change.pressed) break
+        try {
+            while (true) {
+                val event = awaitPointerEvent()
+                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                dx += change.positionChange().x
+                dy += change.positionChange().y
+                if (!change.pressed) break
+            }
+        } finally {
+            onRelease()
         }
         if (abs(dx) < thresholdPx && abs(dy) < thresholdPx) return@awaitEachGesture
         val dir = if (abs(dx) >= abs(dy)) {
@@ -542,6 +600,14 @@ private fun BoardErrorOverlay(message: String, onExit: () -> Unit) {
 
 private const val SWAP_MS = 200
 private const val SWIPE_THRESHOLD_DP = 24
+// Tiles are separated by a small gap and rounded corners so each slice reads as
+// a distinct, movable piece.
+private val TILE_GAP = 2.dp
+private val TILE_RADIUS = 3.dp
+// Touch-cue bounce: swappable neighbors of a held tile pulse up gently.
+private const val BOUNCE_SCALE = 1.06f
+private const val BOUNCE_MS = 320
+private const val BOUNCE_SETTLE_MS = 140
 private const val REVEAL_HOLD_MS = 2000
 private const val HINT_MS = 2500
 private const val HINT_FADE_MS = 200
