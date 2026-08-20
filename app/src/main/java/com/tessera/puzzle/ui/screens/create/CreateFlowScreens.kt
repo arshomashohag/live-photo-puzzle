@@ -68,6 +68,19 @@ fun PickSizeScreen(onPick: (Difficulty) -> Unit, onBack: () -> Unit) {
     }
 }
 
+/**
+ * Neutral full-screen placeholder shown for the transient launcher states
+ * (resolving camera permission or the photo picker). No copy, since these
+ * states flip almost immediately once the Android launcher fires.
+ */
+@Composable
+fun CreateLoadingScreen() {
+    Box(
+        Modifier.fillMaxSize().background(TesseraColors.SplashBg)
+            .windowInsetsPadding(WindowInsets.safeDrawing),
+    )
+}
+
 @Composable
 fun ImportGeneratingScreen() {
     val transition = rememberInfiniteTransition(label = "gen")
