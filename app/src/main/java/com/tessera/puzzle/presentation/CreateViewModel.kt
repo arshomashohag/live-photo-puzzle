@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tessera.puzzle.domain.model.CustomPuzzleNamer
 import com.tessera.puzzle.domain.model.Difficulty
+import com.tessera.puzzle.domain.model.PuzzleNameInput
 import com.tessera.puzzle.domain.model.persistence.PuzzleSource
 import com.tessera.puzzle.camera.CameraController
 import com.tessera.puzzle.domain.repository.PuzzleRepository
@@ -38,41 +39,66 @@ class CreateViewModel @Inject constructor(
     /** True if the device has any camera (drives camera-vs-picker fallback). */
     val hasCamera: Boolean get() = cameraController.hasCamera()
 
-    private val _state = MutableStateFlow<CreateState>(CreateState.Chooser)
+    private val _state = MutableStateFlow<CreateState>(CreateState.Launching)
     val state: StateFlow<CreateState> = _state.asStateFlow()
 
-    fun openChooser() { _state.value = CreateState.Chooser }
-    fun chooseCamera() { _state.value = CreateState.RequestingPermission }
+    /**
+     * Resolve the transient [CreateState.Launching] entry state: go to the
+     * camera (requesting permission) when the device has a camera, otherwise
+     * straight to the gallery picker. Called by the host once.
+     */
+    fun launchDefault() {
+        _state.value =
+            if (hasCamera) CreateState.RequestingPermission
+            else CreateState.PickingGallery
+    }
+
+    /** Open the system photo picker from the camera's gallery shortcut. */
+    fun openGallery() { _state.value = CreateState.PickingGallery }
+
+    /** User dismissed the picker without choosing: return to the camera. */
+    fun pickCancelled() { _state.value = CreateState.RequestingPermission }
+
     fun cameraReady() { _state.value = CreateState.Camera }
     fun permissionDenied() { _state.value = CreateState.PermissionDenied }
 
     fun onCaptured(uri: Uri) { _state.value = CreateState.Review(uri) }
     fun onPicked(uri: Uri) { _state.value = CreateState.Review(uri) }
 
-    fun retake() { _state.value = CreateState.Chooser }
+    /** Retake from Review reopens the live camera. */
+    fun retake() { _state.value = CreateState.RequestingPermission }
 
     fun accept() {
         val s = _state.value
-        if (s is CreateState.Review) _state.value = CreateState.PickSize(s.source)
+        if (s is CreateState.Review) _state.value = CreateState.NameYourPuzzle(s.source)
+    }
+
+    /**
+     * Confirm the user-entered [rawName] for the captured photo. Normalized via
+     * [PuzzleNameInput] — trimmed, length-capped, and falling back to the next
+     * auto-name ("My Puzzle N") when left blank — then advance to size pick.
+     */
+    fun confirmName(rawName: String) {
+        val s = _state.value
+        if (s !is CreateState.NameYourPuzzle) return
+        viewModelScope.launch {
+            val fallback = CustomPuzzleNamer.nextName(customCountSnapshot())
+            val name = PuzzleNameInput.normalize(rawName, fallback)
+            _state.value = CreateState.PickSize(s.source, name)
+        }
     }
 
     fun pickSize(difficulty: Difficulty) {
         val s = _state.value
-        val source = when (s) {
-            is CreateState.PickSize -> s.source
-            is CreateState.Review -> s.source
-            else -> return
-        }
-        _state.value = CreateState.Generating(source, difficulty)
-        generate(source, difficulty)
+        if (s !is CreateState.PickSize) return
+        _state.value = CreateState.Generating(s.source, difficulty, s.name)
+        generate(s.source, difficulty, s.name)
     }
 
-    private fun generate(source: Uri, difficulty: Difficulty) {
+    private fun generate(source: Uri, difficulty: Difficulty, name: String) {
         viewModelScope.launch {
             var result: ImportResult
             val elapsed = measureTimeMillis {
-                val existingCustom = customCountSnapshot()
-                val name = CustomPuzzleNamer.nextName(existingCustom)
                 result = photoImporter.import(source, name)
             }
             // Minimum-duration transition (BR2-8).
@@ -95,12 +121,12 @@ class CreateViewModel @Inject constructor(
         }
     }
 
-    fun dismissError() { _state.value = CreateState.Chooser }
-    fun consumeReady() { _state.value = CreateState.Chooser }
+    fun dismissError() { _state.value = CreateState.RequestingPermission }
+    fun consumeReady() { _state.value = CreateState.Launching }
 
     fun cancel(source: Uri?) {
         source?.let { deleteTempIfCache(it) }
-        _state.value = CreateState.Chooser
+        _state.value = CreateState.Launching
     }
 
     private suspend fun customCountSnapshot(): Int {

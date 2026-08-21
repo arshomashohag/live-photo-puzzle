@@ -42,14 +42,22 @@ fun CreateFlowHost(
     val pickerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia(),
     ) { uri: Uri? ->
-        if (uri != null) vm.onPicked(uri) else vm.openChooser()
+        // Dismissed picker returns to the camera (or exits on camera-less
+        // devices, where the camera route is unavailable).
+        if (uri != null) vm.onPicked(uri)
+        else if (vm.hasCamera) vm.pickCancelled() else onCancel()
     }
 
     // React to state transitions that need Android launchers.
     LaunchedEffect(state) {
         when (val s = state) {
+            is CreateState.Launching -> vm.launchDefault()
             is CreateState.RequestingPermission ->
                 permissionLauncher.launch(android.Manifest.permission.CAMERA)
+            is CreateState.PickingGallery ->
+                pickerLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                )
             is CreateState.Ready -> {
                 gameViewModel.startBoard(s.puzzleId, s.difficulty)
                 onReady(s.puzzleId, s.difficulty)
@@ -60,16 +68,11 @@ fun CreateFlowHost(
     }
 
     when (val s = state) {
-        CreateState.Chooser -> CreateChooserScreen(
-            onTakePhoto = { vm.chooseCamera() },
-            onChoosePhoto = {
-                pickerLauncher.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                )
-            },
-            onBack = onCancel,
-        )
-        CreateState.RequestingPermission -> CreateChooserScreen({}, {}, onCancel)
+        // Transient states while an Android launcher (camera permission / photo
+        // picker) is resolving — show a neutral placeholder, no chooser screen.
+        CreateState.Launching,
+        CreateState.RequestingPermission,
+        CreateState.PickingGallery -> CreateLoadingScreen()
         CreateState.PermissionDenied -> PermissionNeededScreen(
             onOpenSettings = {
                 context.startActivity(
@@ -89,12 +92,18 @@ fun CreateFlowHost(
         CreateState.Camera -> CameraScreen(
             controller = vm.cameraController,
             onCaptured = { vm.onCaptured(it) },
-            onCancel = { vm.openChooser() },
+            onOpenGallery = { vm.openGallery() },
+            onBack = onCancel,
         )
         is CreateState.Review -> ReviewScreen(
             source = s.source,
             onRetake = { vm.retake() },
             onAccept = { vm.accept() },
+        )
+        is CreateState.NameYourPuzzle -> NameScreen(
+            source = s.source,
+            onConfirm = { vm.confirmName(it) },
+            onBack = { vm.retake() },
         )
         is CreateState.PickSize -> PickSizeScreen(
             onPick = { vm.pickSize(it) },
