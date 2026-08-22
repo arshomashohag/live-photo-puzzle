@@ -5,6 +5,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.tessera.puzzle.domain.model.feedback.CompleteSound
+import com.tessera.puzzle.domain.model.feedback.MoveSound
 import com.tessera.puzzle.domain.model.persistence.Settings
 import com.tessera.puzzle.domain.model.persistence.ThemeMode
 import com.tessera.puzzle.domain.repository.SettingsRepository
@@ -24,6 +26,12 @@ class SettingsRepositoryImpl @Inject constructor(
                 ThemeMode.valueOf(prefs[KEY_THEME] ?: ThemeMode.SYSTEM.name)
             }.getOrDefault(ThemeMode.SYSTEM),
             guideShown = prefs[KEY_GUIDE_SHOWN] ?: false,
+            moveSound = runCatching {
+                MoveSound.valueOf(prefs[KEY_MOVE_SOUND] ?: MoveSound.SOFT_TICK.name)
+            }.getOrDefault(MoveSound.SOFT_TICK),
+            completeSound = runCatching {
+                CompleteSound.valueOf(prefs[KEY_COMPLETE_SOUND] ?: CompleteSound.ARPEGGIO.name)
+            }.getOrDefault(CompleteSound.ARPEGGIO),
         )
     }
 
@@ -43,10 +51,20 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { it[KEY_GUIDE_SHOWN] = shown }
     }
 
+    override suspend fun setMoveSound(sound: MoveSound) {
+        dataStore.edit { it[KEY_MOVE_SOUND] = sound.name }
+    }
+
+    override suspend fun setCompleteSound(sound: CompleteSound) {
+        dataStore.edit { it[KEY_COMPLETE_SOUND] = sound.name }
+    }
+
     private companion object {
         val KEY_SOUND = booleanPreferencesKey("sound_enabled")
         val KEY_HAPTICS = booleanPreferencesKey("haptics_enabled")
         val KEY_THEME = stringPreferencesKey("theme_mode")
         val KEY_GUIDE_SHOWN = booleanPreferencesKey("guide_shown")
+        val KEY_MOVE_SOUND = stringPreferencesKey("move_sound")
+        val KEY_COMPLETE_SOUND = stringPreferencesKey("complete_sound")
     }
 }

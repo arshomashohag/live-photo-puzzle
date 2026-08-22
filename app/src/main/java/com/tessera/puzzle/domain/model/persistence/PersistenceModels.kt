@@ -1,6 +1,8 @@
 package com.tessera.puzzle.domain.model.persistence
 
 import com.tessera.puzzle.domain.model.Difficulty
+import com.tessera.puzzle.domain.model.feedback.CompleteSound
+import com.tessera.puzzle.domain.model.feedback.MoveSound
 
 /**
  * Source of a puzzle: bundled with the app or created by the user.
@@ -90,6 +92,8 @@ data class Settings(
     val hapticsEnabled: Boolean = true,
     val theme: ThemeMode = ThemeMode.SYSTEM,
     val guideShown: Boolean = false,
+    val moveSound: MoveSound = MoveSound.SOFT_TICK,
+    val completeSound: CompleteSound = CompleteSound.ARPEGGIO,
 )
 
 /**

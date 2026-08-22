@@ -1,6 +1,8 @@
 package com.tessera.puzzle.domain.repository
 
 import com.tessera.puzzle.domain.model.Difficulty
+import com.tessera.puzzle.domain.model.feedback.CompleteSound
+import com.tessera.puzzle.domain.model.feedback.MoveSound
 import com.tessera.puzzle.domain.model.persistence.BestScore
 import com.tessera.puzzle.domain.model.persistence.HomeStats
 import com.tessera.puzzle.domain.model.persistence.PuzzleRecord
@@ -56,4 +58,6 @@ interface SettingsRepository {
     suspend fun setHapticsEnabled(enabled: Boolean)
     suspend fun setTheme(mode: ThemeMode)
     suspend fun setGuideShown(shown: Boolean)
+    suspend fun setMoveSound(sound: MoveSound)
+    suspend fun setCompleteSound(sound: CompleteSound)
 }
