@@ -4,6 +4,13 @@ All notable changes to Tessera are documented here. This project adheres
 to [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
+## [1.0.4] - 2026-08-22
+
+### Added
+- Choose your sounds: Settings now lets you pick from five move sounds
+  (Soft tick, Pop, Click, Marimba, Glass) and four completion sounds
+  (Arpeggio, Sparkle, Chime, Fanfare). Tap an option to hear it and select it.
+
 ## [1.0.3] - 2026-08-21
 
 ### Added
