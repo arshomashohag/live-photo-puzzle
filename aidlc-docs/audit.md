@@ -760,3 +760,32 @@
 **Context**: Phase 6 CONSTRUCTION complete. User action remaining: host PRIVACY.md at a public URL. Phase 6 docs not yet committed.
 
 ---
+
+## Phase 7 — Post-release UX iterations (board + create flow) → v1.0.3
+**Timestamp**: 2026-08-21T00:00:00Z
+**User Input**: "[batch of UI/UX change requests] (1) custom puzzles show only an orange square, no photo thumbnail — fix to show the photo; (2) after capturing a photo, add a step to name the puzzle, trim long names to preview width single-line; (3) 1–2px gap + rounded corners between tiles; (4) center the board vertically/horizontally, align Hint/Pause to the bottom; (5) touching a tile bounces its swappable neighbours; (6) add a move/slide animation on swap. 'show me the mockup design first and then implement'. Later revisions: name field must overlay on top of the keyboard (preview fixed, only the field floats up); remove the intermediate chooser screen — creating a custom puzzle opens the camera by default with a gallery icon alongside the shutter; camera Cancel becomes a back button to Home; camera-less devices open the gallery picker directly."
+**AI Response**: "Classified as bounded change; implemented mockup-first then with TDD for pure logic. Delivered: PuzzleSelectScreen thumbnail decode for FileRef custom puzzles; PuzzleNameInput pure normalizer (trim/cap/fallback) + 6 Kotest property tests; NameScreen (keyboard-overlay input, single-line ellipsis name preview); camera-first CreateState machine (Launching/PickingGallery, chooser removed) with CreateViewModel/CreateFlowHost rewrite; CameraScreen back-button + gallery shortcut; BoardScreen gapped rounded tiles, centered board, neighbour bounce cue, swap slide. VERIFICATION: compileDebugKotlin ✅, testDebugUnitTest ✅ (incl. new tests), lintDebug 0 errors, assembleDebug ✅. Committed in 3 groups on feat/board-and-create-flow-improvements (6592c73 fix puzzle-select, 2224da3 feat board, 839786c feat create); merged via PR #8 (54ab5a7)."
+**Build Status**: Success (assembleDebug)
+**Test Status**: Pass (unit + new property tests, lint 0 errors)
+**Context**: Post-Phase-6 bounded UX iteration. Merged to main; released as v1.0.3.
+
+---
+
+## Phase 7 — Release v1.0.3 (tag + changelog)
+**Timestamp**: 2026-08-21T00:00:00Z
+**User Input**: "create a new release tag" / "the new changes are in main. I've merged the pr. Pull it and create from main" / "release doesn't contain any changed or added lists" / "release note is too long"
+**AI Response**: "Pulled main (merge 54ab5a7). Added CHANGELOG.md [1.0.3] section (Added: name-your-puzzle, camera gallery shortcut; Changed: custom thumbnails, centered gapped board, neighbour bounce, camera-first flow), committed docs(changelog) f765dd0. Created annotated tag v1.0.3 on f765dd0 matching v1.0.1/1.0.2 convention and force-pushed after moving it to include the changelog. Provided GitHub Release name + concise notes. Note: versionName still resolves from VERSION_NAME env (defaults 1.0.0) — CI must inject 1.0.3."
+**Context**: v1.0.3 tagged and pushed; changelog on main. GitHub Release object creation left to user (gh not installed).
+
+---
+
+## Phase 7 — Feature: selectable move/completion sounds in the settings drawer
+**Timestamp**: 2026-08-22T00:00:00Z
+**User Input**: "add some tile move sounds and completion sounds. give me some to hear and select" → "Add all as options to choose from in the drawer. Show me the design first." → (design revisions) "collapsible but when expanded show the whole list so that player don't need to scroll" → "In the label, don't add Sound. Just Move and Completion. proceed to implementation"
+**AI Response**: "Synthesized 9 candidate SFX (5 move: soft_tick/pop/click/marimba/glass; 4 completion: arpeggio/sparkle/chime/fanfare) as 16-bit mono 44.1kHz WAVs; auditioned via an offline HTML soundboard artifact; approved a collapsible drawer-picker design (labels 'Move'/'Completion', whole list shown when expanded, no inner scroll, tap = select + preview, gated by the Sound toggle). Implemented with TDD: MoveSound/CompleteSound enums + SoundClip; extended pure FeedbackDecider (variant resolution + independent gating) with rewritten Kotest property tests; SoundPlayer preloads all 9 variants + preview API; Settings fields + DataStore keys (defaults soft_tick/arpeggio); SettingsRepository/ViewModel setters (persist + preview); collapsible SoundPicker/SoundOptionRow in SettingsDrawerContent; removed the 2 old unreferenced WAVs. VERIFICATION: compileDebugKotlin ✅, testDebugUnitTest ✅, lintDebug 0 errors, assembleDebug ✅ (~67 MB APK). Not on-device audio-verified (no emulator/audio available here)."
+**Build Status**: Success (assembleDebug)
+**Test Status**: Pass (unit + updated FeedbackDecider property tests, lint 0 errors)
+**Files Generated/Changed**: FeedbackModels.kt, PersistenceModels.kt, Repositories.kt, SettingsRepositoryImpl.kt, SettingsViewModel.kt, SoundPlayer.kt, FeedbackController.kt, SettingsDrawerContent.kt, FeedbackDeciderPropertiesTest.kt; 9 new res/raw WAVs; 2 old WAVs removed.
+**Context**: Committed df041d4 on feature branch feat/selectable-sounds (moved off main per user rule 'don't commit in main ever again'). Branch unpushed; not yet merged/released.
+
+---
