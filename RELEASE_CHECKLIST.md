@@ -32,6 +32,19 @@ environment from [README.md](README.md) is set (`JAVA_HOME` → JDK 21,
 - [ ] Verify it is signed:
       `unzip -l app/build/outputs/bundle/release/app-release.aab | grep META-INF`
       → shows `TESSERA.RSA` / `TESSERA.SF`.
+- [ ] Verify 16 KB memory page support (Play blocks updates without it from
+      **Feb 1, 2027**; see
+      [page sizes](https://developer.android.com/guide/practices/page-sizes)):
+
+      `bundletool dump config --bundle=app/build/outputs/bundle/release/app-release.aab | grep alignment`
+
+      → must print `PAGE_ALIGNMENT_16K`. To check the shared libraries
+      themselves, build a universal APK from the bundle and run
+      `zipalign -v -c -P 16 4 universal.apk` → "Verification successful".
+      A 4 KB-aligned `.so` almost always comes from a dependency's prebuilt
+      binary, not from this codebase — the fix is to upgrade that dependency
+      (CameraX < 1.4.0 was the cause in 1.0.5), since a prebuilt `.so` cannot
+      be realigned locally.
 
 ## 5. Store listing & compliance
 
