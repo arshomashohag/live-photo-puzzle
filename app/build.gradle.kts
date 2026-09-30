@@ -42,9 +42,16 @@ android {
     }
     buildTypes {
         release {
-            // R8/minification intentionally off this cycle (not a Play
-            // requirement); deferred to a later hardening pass.
-            isMinifyEnabled = false
+            // R8 shrinking + obfuscation, plus resource shrinking. Bundled
+            // drawables are also resolved via Resources.getIdentifier(), which
+            // the shrinker cannot trace, so they are pinned in
+            // res/raw/keep.xml (strict mode).
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
             signingConfig = if (keystorePropsFile.exists()) {
                 signingConfigs.getByName("release")
             } else {
