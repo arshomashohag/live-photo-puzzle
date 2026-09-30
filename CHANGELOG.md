@@ -4,6 +4,14 @@ All notable changes to Tessera are documented here. This project adheres
 to [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
+## [1.0.6] - 2026-09-30
+
+### Changed
+- Much smaller download and install: the app is now a fraction of its previous
+  size, so it downloads faster and takes up far less space on your device.
+- Puzzle thumbnails in the picker and My Puzzles now load using less memory,
+  which keeps scrolling smooth on devices with less RAM.
+
 ## [1.0.5] - 2026-09-30
 
 ### Fixed
