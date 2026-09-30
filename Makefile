@@ -7,7 +7,10 @@ ANDROID_HOME ?= /opt/homebrew/share/android-commandlinetools
 ADB := $(ANDROID_HOME)/platform-tools/adb
 GRADLEW := ./gradlew
 DEBUG_APK := app/build/outputs/apk/debug/app-debug.apk
-RELEASE_APK := app/build/outputs/apk/release/app-release-unsigned.apk
+# Signed when keystore.properties exists at the repo root, unsigned
+# otherwise (see docs/RELEASE_SIGNING.md) — the filename differs.
+RELEASE_APK_SIGNED := app/build/outputs/apk/release/app-release.apk
+RELEASE_APK_UNSIGNED := app/build/outputs/apk/release/app-release-unsigned.apk
 
 export ANDROID_HOME
 
@@ -24,9 +27,13 @@ apk: ## Build the debug APK (default) and print its path
 	@echo "APK: $(DEBUG_APK)"
 
 .PHONY: release-apk
-release-apk: ## Build the unsigned release APK
+release-apk: ## Build the release APK (R8-minified; signed if a keystore is present)
 	$(GRADLEW) :app:assembleRelease
-	@echo "APK: $(RELEASE_APK)"
+	@if [ -f "$(RELEASE_APK_SIGNED)" ]; then \
+		echo "APK: $(RELEASE_APK_SIGNED) ($$(du -h "$(RELEASE_APK_SIGNED)" | cut -f1), signed)"; \
+	else \
+		echo "APK: $(RELEASE_APK_UNSIGNED) ($$(du -h "$(RELEASE_APK_UNSIGNED)" | cut -f1), unsigned)"; \
+	fi
 
 .PHONY: install
 install: ## Build and install the debug APK on a connected device/emulator
