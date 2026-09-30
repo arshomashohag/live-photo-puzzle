@@ -4,6 +4,14 @@ All notable changes to Tessera are documented here. This project adheres
 to [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
+## [1.0.5] - 2026-09-30
+
+### Fixed
+- 16 KB memory page size support: the app now runs on devices configured with
+  16 KB memory pages, which Android 15 and later support. This was resolved by
+  updating CameraX to 1.4.2, whose bundled native library is aligned for 16 KB
+  pages; the 1.3.4 release it replaces was aligned only for 4 KB.
+
 ## [1.0.4] - 2026-08-22
 
 ### Added
