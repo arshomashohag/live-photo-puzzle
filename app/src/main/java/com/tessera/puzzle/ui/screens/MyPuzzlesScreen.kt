@@ -1,6 +1,5 @@
 package com.tessera.puzzle.ui.screens
 
-import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,13 +32,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tessera.puzzle.data.ThumbnailLoader
 import com.tessera.puzzle.domain.model.layoutSpec
 import com.tessera.puzzle.domain.model.persistence.ImageRef
 import com.tessera.puzzle.domain.model.persistence.PuzzleRecord
@@ -109,9 +108,7 @@ private fun CustomCard(p: PuzzleRecord, onPlay: () -> Unit, onDelete: () -> Unit
     var thumb by remember(thumbPath) { mutableStateOf<ImageBitmap?>(null) }
     LaunchedEffect(thumbPath) {
         thumb = withContext(Dispatchers.IO) {
-            thumbPath?.let { path ->
-                runCatching { BitmapFactory.decodeFile(path)?.asImageBitmap() }.getOrNull()
-            }
+            thumbPath?.let { path -> ThumbnailLoader.load(path) }
         }
     }
     RegistrationFrame(Modifier.fillMaxWidth().clickable { onPlay() }) {

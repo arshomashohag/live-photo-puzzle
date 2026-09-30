@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Resource-shrinker keep rules (isShrinkResources = true).
+
+  The bundled puzzle drawables are reached two ways: statically via
+  PuzzleCatalog (R.drawable.tessera_*), and reflectively via
+  Resources.getIdentifier(ref.resName, "drawable", packageName) in
+  GameViewModel and PuzzleSelectScreen, where resName is a string read back
+  from Room. The shrinker cannot trace that second path, so the images are
+  pinned here rather than left to depend on the static reference surviving.
+
+  shrinkMode="strict" means resources are kept only when an actual reference
+  is found, instead of the default heuristic that retains anything matching a
+  getIdentifier()-style string pattern.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/tessera_*"
+    tools:shrinkMode="strict" />

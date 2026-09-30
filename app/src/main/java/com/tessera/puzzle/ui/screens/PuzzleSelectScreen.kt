@@ -1,6 +1,5 @@
 package com.tessera.puzzle.ui.screens
 
-import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -35,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.tessera.puzzle.data.ThumbnailLoader
 import com.tessera.puzzle.domain.model.Difficulty
 import com.tessera.puzzle.domain.model.layoutSpec
 import com.tessera.puzzle.domain.model.persistence.ImageRef
@@ -109,9 +108,7 @@ private fun PuzzleCard(
                         var thumb by remember(thumbPath) { mutableStateOf<ImageBitmap?>(null) }
                         LaunchedEffect(thumbPath) {
                             thumb = withContext(Dispatchers.IO) {
-                                runCatching {
-                                    BitmapFactory.decodeFile(thumbPath)?.asImageBitmap()
-                                }.getOrNull()
+                                ThumbnailLoader.load(thumbPath)
                             }
                         }
                         Box(Modifier.fillMaxWidth().aspectRatio(1f).background(TesseraColors.Sky)) {
